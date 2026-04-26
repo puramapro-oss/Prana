@@ -390,6 +390,38 @@ export type Database = {
         }
         Relationships: []
       }
+      executions: {
+        Row: {
+          id: string
+          user_id: string
+          type: ExecutionType
+          context_json: Json | null
+          draft_text: string
+          draft_alternatives: Json | null
+          approved: boolean
+          used_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: ExecutionType
+          context_json?: Json | null
+          draft_text: string
+          draft_alternatives?: Json | null
+          approved?: boolean
+          used_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          context_json?: Json | null
+          draft_text?: string
+          draft_alternatives?: Json | null
+          approved?: boolean
+          used_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: { [k: string]: never }
     Functions: { [k: string]: never }
@@ -445,6 +477,10 @@ export type NoteUpdate = PranaTables["notes"]["Update"]
 export type LifeosPlan = PranaTables["lifeos_plans"]["Row"]
 export type LifeosPlanInsert = PranaTables["lifeos_plans"]["Insert"]
 export type LifeosPlanUpdate = PranaTables["lifeos_plans"]["Update"]
+
+export type Execution = PranaTables["executions"]["Row"]
+export type ExecutionInsert = PranaTables["executions"]["Insert"]
+export type ExecutionUpdate = PranaTables["executions"]["Update"]
 
 /**
  * Classification output from the LifeOS classifier (haiku-4-5).
