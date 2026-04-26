@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/shared/theme-provider"
+import { QueryProvider } from "@/components/providers/query-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -89,8 +90,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster position="top-center" richColors closeButton />
+          <QueryProvider>
+            {children}
+            <Toaster position="top-center" richColors closeButton />
+          </QueryProvider>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
