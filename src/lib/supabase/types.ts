@@ -11,6 +11,8 @@
 export type Plan = "free" | "starter" | "pro" | "ultime"
 export type Locale = "fr" | "en"
 export type TaskStatus = "todo" | "doing" | "done" | "dropped"
+export type ProjectStatus = "active" | "paused" | "done" | "dropped"
+export type EnergyRequired = "low" | "medium" | "high"
 export type CaptureSource = "text" | "voice" | "image" | "email" | "share"
 export type ExecutionType = "message" | "email" | "post" | "plan" | "doc" | "script"
 export type SafetySeverity = "low" | "medium" | "high" | "critical"
@@ -199,6 +201,195 @@ export type Database = {
         }
         Relationships: []
       }
+      captures: {
+        Row: {
+          id: string
+          user_id: string
+          raw_text: string
+          source: CaptureSource
+          audio_url: string | null
+          classified_at: string | null
+          classification: Json | null
+          archived: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          raw_text: string
+          source: CaptureSource
+          audio_url?: string | null
+          classified_at?: string | null
+          classification?: Json | null
+          archived?: boolean
+          created_at?: string
+        }
+        Update: {
+          raw_text?: string
+          classified_at?: string | null
+          classification?: Json | null
+          archived?: boolean
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          why: string | null
+          status: ProjectStatus
+          target_date: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          why?: string | null
+          status?: ProjectStatus
+          target_date?: string | null
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          why?: string | null
+          status?: ProjectStatus
+          target_date?: string | null
+        }
+        Relationships: []
+      }
+      people: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          relation: string | null
+          notes: string | null
+          last_contact_at: string | null
+          contact_frequency_days: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          relation?: string | null
+          notes?: string | null
+          last_contact_at?: string | null
+          contact_frequency_days?: number | null
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          relation?: string | null
+          notes?: string | null
+          last_contact_at?: string | null
+          contact_frequency_days?: number | null
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string | null
+          status: TaskStatus
+          priority: number
+          energy_required: EnergyRequired | null
+          time_estimate_minutes: number | null
+          due_at: string | null
+          project_id: string | null
+          person_id: string | null
+          source_capture_id: string | null
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          description?: string | null
+          status?: TaskStatus
+          priority?: number
+          energy_required?: EnergyRequired | null
+          time_estimate_minutes?: number | null
+          due_at?: string | null
+          project_id?: string | null
+          person_id?: string | null
+          source_capture_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          title?: string
+          description?: string | null
+          status?: TaskStatus
+          priority?: number
+          energy_required?: EnergyRequired | null
+          time_estimate_minutes?: number | null
+          due_at?: string | null
+          project_id?: string | null
+          person_id?: string | null
+          completed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          id: string
+          user_id: string
+          title: string | null
+          body: string
+          tags: string[]
+          pinned: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title?: string | null
+          body: string
+          tags?: string[]
+          pinned?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          title?: string | null
+          body?: string
+          tags?: string[]
+          pinned?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lifeos_plans: {
+        Row: {
+          id: string
+          user_id: string
+          start_date: string
+          payload: Json
+          generated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          start_date: string
+          payload: Json
+          generated_at?: string
+        }
+        Update: {
+          payload?: Json
+          generated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [k: string]: never }
     Functions: { [k: string]: never }
@@ -230,3 +421,43 @@ export type RegulationSessionInsert = PranaTables["regulation_sessions"]["Insert
 
 export type MagicButtonUsage = PranaTables["magic_button_usages"]["Row"]
 export type MagicButtonUsageInsert = PranaTables["magic_button_usages"]["Insert"]
+
+export type Capture = PranaTables["captures"]["Row"]
+export type CaptureInsert = PranaTables["captures"]["Insert"]
+export type CaptureUpdate = PranaTables["captures"]["Update"]
+
+export type Project = PranaTables["projects"]["Row"]
+export type ProjectInsert = PranaTables["projects"]["Insert"]
+export type ProjectUpdate = PranaTables["projects"]["Update"]
+
+export type Person = PranaTables["people"]["Row"]
+export type PersonInsert = PranaTables["people"]["Insert"]
+export type PersonUpdate = PranaTables["people"]["Update"]
+
+export type Task = PranaTables["tasks"]["Row"]
+export type TaskInsert = PranaTables["tasks"]["Insert"]
+export type TaskUpdate = PranaTables["tasks"]["Update"]
+
+export type Note = PranaTables["notes"]["Row"]
+export type NoteInsert = PranaTables["notes"]["Insert"]
+export type NoteUpdate = PranaTables["notes"]["Update"]
+
+export type LifeosPlan = PranaTables["lifeos_plans"]["Row"]
+export type LifeosPlanInsert = PranaTables["lifeos_plans"]["Insert"]
+export type LifeosPlanUpdate = PranaTables["lifeos_plans"]["Update"]
+
+/**
+ * Classification output from the LifeOS classifier (haiku-4-5).
+ * Stored as JSONB in `captures.classification`.
+ */
+export interface CaptureClassification {
+  type: "task" | "note" | "project" | "person_note" | "idea" | "ignore"
+  priority: 1 | 2 | 3 | 4 | 5
+  suggested_title: string
+  energy_required: EnergyRequired | null
+  time_estimate_minutes: number | null
+  project_match: string | null
+  person_match: string | null
+  tags: string[]
+  reasoning: string
+}
