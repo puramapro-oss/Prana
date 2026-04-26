@@ -14,7 +14,9 @@ import {
 } from "@/lib/agent/prompts/execute"
 import { classifyForSafety } from "@/lib/safety/classifier"
 import { logSafetyEvent, escalationHint } from "@/lib/safety/escalation"
+import { loadTwin } from "@/lib/agent/twin-loader"
 import type { Plan, Profile } from "@/lib/supabase/types"
+import type { TwinSnapshot } from "@/lib/agent/prompts/system-prana"
 
 export const runtime = "nodejs"
 
@@ -117,13 +119,26 @@ export async function POST(req: NextRequest) {
       safetyRedirect = escalationHint(safety)?.redirect ?? "/sos"
     }
 
+    const fullTwin = await loadTwin(user.id)
+    const twin: TwinSnapshot | null = fullTwin.hasProfile
+      ? {
+          tone: fullTwin.tone,
+          length: fullTwin.length,
+          formality: fullTwin.formality,
+          stressTriggers: fullTwin.stressTriggers,
+          rechargeActivities: fullTwin.rechargeActivities,
+          efficientHours: fullTwin.efficientHours,
+          personalRules: fullTwin.personalRules,
+        }
+      : null
+
     const executeInput: ExecuteInput = {
       type: input.type,
       situation: input.situation,
       recipient: input.recipient,
       tone: input.tone,
       locale,
-      twin: null, // Twin Profile injection in P6
+      twin,
     }
 
     let output: ExecuteOutput

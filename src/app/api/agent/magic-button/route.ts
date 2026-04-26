@@ -7,6 +7,7 @@ import { checkDailyQuota } from "@/lib/quotas"
 import { findMagicButton, isMagicButtonAccessible } from "@/lib/agent/magic-buttons-config"
 import { askClaudeJSON } from "@/lib/agent/anthropic"
 import { getSystemPrompt } from "@/lib/agent/prompts/system-prana"
+import { loadTwin, toTwinSnapshot } from "@/lib/agent/twin-loader"
 import { MAGIC_BUTTON_PROMPTS, JSON_OUTPUT_INSTRUCTION, type MagicButtonResponse } from "@/lib/agent/prompts/magic-buttons"
 import { classifyForSafety } from "@/lib/safety/classifier"
 import { logSafetyEvent, escalationHint } from "@/lib/safety/escalation"
@@ -117,8 +118,16 @@ export async function POST(req: NextRequest) {
       "stress" | "energy" | "time_available" | "context" | "created_at"
     >[]
 
+    const fullTwin = await loadTwin(user.id)
+    const twinSnapshot = toTwinSnapshot(fullTwin)
     const promptDef = MAGIC_BUTTON_PROMPTS[button.slug]
-    const system = `${getSystemPrompt({ locale, plan: userPlan, twin: null, recentPulses: pulses })}\n\n${promptDef.promptInstructions}\n\n${JSON_OUTPUT_INSTRUCTION}`
+    const system = `${getSystemPrompt({
+      locale,
+      plan: userPlan,
+      twin: twinSnapshot,
+      recentPulses: pulses,
+      protectiveMode: fullTwin.protectiveMode,
+    })}\n\n${promptDef.promptInstructions}\n\n${JSON_OUTPUT_INSTRUCTION}`
 
     const lastPulse = pulses[0]
     const userMessage = [

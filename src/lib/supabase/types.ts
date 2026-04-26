@@ -390,6 +390,54 @@ export type Database = {
         }
         Relationships: []
       }
+      twin_profiles: {
+        Row: {
+          id: string
+          user_id: string
+          communication_style: Json | null
+          decision_patterns: Json | null
+          stress_triggers: string[] | null
+          recharge_activities: string[] | null
+          efficient_hours: number[] | null
+          working_habits: Json | null
+          personal_rules: string[] | null
+          values: string[] | null
+          protective_mode: boolean
+          last_full_update: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          communication_style?: Json | null
+          decision_patterns?: Json | null
+          stress_triggers?: string[] | null
+          recharge_activities?: string[] | null
+          efficient_hours?: number[] | null
+          working_habits?: Json | null
+          personal_rules?: string[] | null
+          values?: string[] | null
+          protective_mode?: boolean
+          last_full_update?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          communication_style?: Json | null
+          decision_patterns?: Json | null
+          stress_triggers?: string[] | null
+          recharge_activities?: string[] | null
+          efficient_hours?: number[] | null
+          working_habits?: Json | null
+          personal_rules?: string[] | null
+          values?: string[] | null
+          protective_mode?: boolean
+          last_full_update?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       executions: {
         Row: {
           id: string
@@ -481,6 +529,42 @@ export type LifeosPlanUpdate = PranaTables["lifeos_plans"]["Update"]
 export type Execution = PranaTables["executions"]["Row"]
 export type ExecutionInsert = PranaTables["executions"]["Insert"]
 export type ExecutionUpdate = PranaTables["executions"]["Update"]
+
+export type TwinProfile = PranaTables["twin_profiles"]["Row"]
+export type TwinProfileInsert = PranaTables["twin_profiles"]["Insert"]
+export type TwinProfileUpdate = PranaTables["twin_profiles"]["Update"]
+
+/**
+ * Strongly-typed shape of `twin_profiles.communication_style` JSONB.
+ * Aligns with sliders exposed in /twin/personality.
+ */
+export interface TwinCommunicationStyle {
+  tone?: "casual" | "warm" | "professional" | "direct" | "playful" | null
+  length?: "short" | "medium" | "long" | null
+  formality?: "low" | "medium" | "high" | null
+  emoji_use?: "none" | "rare" | "moderate" | "frequent" | null
+}
+
+/**
+ * Strongly-typed shape of `twin_profiles.working_habits` JSONB.
+ */
+export interface TwinWorkingHabits {
+  best_focus_window?: "morning" | "afternoon" | "evening" | "night" | null
+  break_frequency_minutes?: number | null
+  preferred_session_minutes?: number | null
+  avoid_meetings_before_hour?: number | null
+  weekends_off?: boolean | null
+}
+
+/**
+ * Strongly-typed shape of `twin_profiles.decision_patterns` JSONB.
+ */
+export interface TwinDecisionPatterns {
+  speed?: "fast" | "deliberate" | "context_dependent" | null
+  evidence_preference?: "data" | "intuition" | "balanced" | null
+  risk_appetite?: "low" | "medium" | "high" | null
+  consultation?: "solo" | "with_others" | "varies" | null
+}
 
 /**
  * Classification output from the LifeOS classifier (haiku-4-5).

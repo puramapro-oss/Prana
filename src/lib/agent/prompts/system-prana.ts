@@ -8,6 +8,7 @@ export interface TwinSnapshot {
   rechargeActivities?: string[] | null
   efficientHours?: number[] | null
   personalRules?: string[] | null
+  values?: string[] | null
 }
 
 export interface SystemPromptContext {
@@ -15,6 +16,8 @@ export interface SystemPromptContext {
   plan: "free" | "starter" | "pro" | "ultime"
   twin: TwinSnapshot | null
   recentPulses: Pick<PulseCheck, "stress" | "energy" | "time_available" | "context" | "created_at">[]
+  /** When true, soften any incoming stressful framing in user-visible output. */
+  protectiveMode?: boolean
 }
 
 const BASE = `Tu es PURAMA ONE (PRANA), un OS humain.
@@ -69,13 +72,21 @@ function formatTwin(t: TwinSnapshot | null): string {
   if (t.rechargeActivities?.length) lines.push(`- Recharge : ${t.rechargeActivities.join(", ")}`)
   if (t.efficientHours?.length) lines.push(`- Heures efficaces : ${t.efficientHours.join(", ")}h`)
   if (t.personalRules?.length) lines.push(`- Règles perso : ${t.personalRules.join(" | ")}`)
+  if (t.values?.length) lines.push(`- Valeurs : ${t.values.join(", ")}`)
   return lines.length ? `Twin Profile :\n${lines.join("\n")}` : "Twin Profile : minimal."
 }
+
+const PROTECTIVE_MODE_BLOCK = `MODE PROTECTEUR ACTIVÉ
+- L'utilisateur a demandé que les messages stressants soient adoucis.
+- Reformule les demandes urgentes en termes calmes, sans dramatiser.
+- Privilégie un seul élément à la fois. Évite les listes longues.
+- Coupe le superflu. Garde la chaleur.`
 
 export function getSystemPrompt(ctx: SystemPromptContext): string {
   const planLine = `Plan utilisateur : ${ctx.plan}.`
   const localeLine = `Langue de réponse : ${ctx.locale === "fr" ? "français" : "english"}.`
   const twinBlock = formatTwin(ctx.twin)
   const pulseBlock = `Pulse Checks récents (jusqu'à 7) :\n${formatPulses(ctx.recentPulses)}`
-  return `${BASE}\n\n${planLine}\n${localeLine}\n\n${twinBlock}\n\n${pulseBlock}`
+  const protectiveBlock = ctx.protectiveMode ? `\n\n${PROTECTIVE_MODE_BLOCK}` : ""
+  return `${BASE}\n\n${planLine}\n${localeLine}\n\n${twinBlock}\n\n${pulseBlock}${protectiveBlock}`
 }

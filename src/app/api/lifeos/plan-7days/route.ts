@@ -11,6 +11,7 @@ import {
   type Plan7DaysInput,
   type Plan7DaysOutput,
 } from "@/lib/agent/prompts/plan-7days"
+import { loadTwin, toTwinSnapshot } from "@/lib/agent/twin-loader"
 import type {
   Plan,
   Profile,
@@ -176,13 +177,14 @@ export async function POST(req: NextRequest) {
     >[]
     const activeProjects = (projectsResp.data ?? []) as Pick<Project, "id" | "name" | "why">[]
 
+    const fullTwin = await loadTwin(user.id)
     const input: Plan7DaysInput = {
       startDate: start,
       locale: profile?.locale ?? "fr",
       recentPulses,
       openTasks,
       activeProjects,
-      twin: null, // Built in P6 — not blocking
+      twin: toTwinSnapshot(fullTwin),
     }
 
     let output: Plan7DaysOutput
