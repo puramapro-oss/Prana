@@ -43,10 +43,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
   const found = !!profileResp.data
 
   const response = NextResponse.redirect(signupUrl)
-  // Always set the cookie. The /auth/callback route validates the referrer
-  // profile before inserting a referrals row, so a bogus code is harmless.
-  // We previously gated the cookie on `found`, but that adds a DB roundtrip
-  // for every /r/* hit on the same redirect path — overkill and brittle.
+  response.headers.set("cache-control", "no-store, max-age=0")
   response.cookies.set({
     name: COOKIE_NAME,
     value: safeCode,
@@ -56,9 +53,6 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   })
-  // `found` retained as a hint surfaced in logs; the variable is intentionally
-  // unused in the response so the rule "validate at callback time" stays the
-  // single source of truth.
   void found
   return response
 }
