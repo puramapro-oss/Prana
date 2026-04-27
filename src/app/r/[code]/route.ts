@@ -41,7 +41,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
     .maybeSingle()
   const found = !!profileResp.data
 
+  // Diagnostic header (not exposed in user UX). Helpful in Vercel logs/curl-I.
+  // Strips to a stable shape: ok|empty|err.
+  const debugStatus = profileResp.error
+    ? `err:${profileResp.error.code ?? "x"}`
+    : found
+      ? "ok"
+      : "empty"
+
   const response = NextResponse.redirect(signupUrl)
+  response.headers.set("x-prana-ref", debugStatus)
   if (found) {
     response.cookies.set({
       name: COOKIE_NAME,
