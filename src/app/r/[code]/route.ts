@@ -42,8 +42,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
     .maybeSingle()
   const found = !!profileResp.data
 
-  const response = NextResponse.redirect(signupUrl)
-  response.headers.set("cache-control", "no-store, max-age=0")
+  // Build a manual 307 response so we keep full control over Set-Cookie and
+  // cache-control. NextResponse.redirect() applies its own cache headers and,
+  // on Vercel, can have its Set-Cookie dropped at the edge.
+  const response = new NextResponse(null, {
+    status: 307,
+    headers: {
+      location: signupUrl.toString(),
+      "cache-control": "no-store",
+    },
+  })
   response.cookies.set({
     name: COOKIE_NAME,
     value: safeCode,
