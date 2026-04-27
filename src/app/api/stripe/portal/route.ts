@@ -45,13 +45,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
-    const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
-    console.error("[stripe/portal] error:", detail, err)
+    console.error("[stripe/portal] error:", err)
     return NextResponse.json(
-      {
-        error: "Impossible d'ouvrir le portail. Réessaie dans un instant.",
-        ...(process.env.STRIPE_DEBUG === "1" ? { detail } : {}),
-      },
+      { error: "Impossible d'ouvrir le portail. Réessaie dans un instant." },
       { status: 500 },
     )
   }

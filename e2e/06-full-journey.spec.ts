@@ -87,12 +87,14 @@ test.describe("v1.1.1 — full authenticated journey", () => {
     for (const b of MAGIC_BUTTONS) {
       const btn = page.getByRole("button", { name: new RegExp(b.name, "i") }).first()
       await btn.click()
-      // Dialog should open with the button's title in heading
-      const heading = page.getByRole("heading", { name: new RegExp(b.name, "i") })
+      // Card has its own h3 with the button name; the modal renders a separate
+      // DialogTitle inside [role=dialog]. Scope the assertion to the dialog.
+      const dialog = page.getByRole("dialog")
+      const heading = dialog.getByRole("heading", { name: new RegExp(b.name, "i") })
       await expect(heading.first()).toBeVisible({ timeout: 5_000 })
-      // Close the modal — Escape works for base-ui Dialog
+      // Close the modal — Escape works for base-ui Dialog.
       await page.keyboard.press("Escape")
-      await expect(heading.first()).toBeHidden({ timeout: 3_000 })
+      await expect(dialog).toBeHidden({ timeout: 3_000 })
     }
     await page.close()
   })
@@ -101,10 +103,13 @@ test.describe("v1.1.1 — full authenticated journey", () => {
     test.skip(!authReachable, "auth down")
     if (!auth) return
     const ctx = auth.context
+    // Schema (src/app/api/agent/pulse-check/route.ts):
+    //   stress / energy: int 0..10
+    //   time_available: "20s" | "2min" | "10min" | "1h"
+    //   context: "home" | "work" | "outside" | "transit" | "bed" | "other"
     const res = await ctx.request.post("/api/agent/pulse-check", {
-      data: { stress: 60, energy: 40, time_available: 5, context: "deep_work" },
+      data: { stress: 6, energy: 4, time_available: "2min", context: "work" },
     })
-    // Some shapes accept optional fields; we accept 200 OR 201 OR 400 with explicit error message.
     expect([200, 201]).toContain(res.status())
     const json = await res.json()
     expect(json).toHaveProperty("ok")
@@ -163,8 +168,11 @@ test.describe("v1.1.1 — full authenticated journey", () => {
     if (!auth) return
     const page = await auth.context.newPage()
     await page.goto("/settings/referral")
-    // The page renders an input/text containing "/ref/<code>"
-    await expect(page.getByText(/\/ref\//).first()).toBeVisible({ timeout: 10_000 })
+    // The URL is rendered inside a readonly <input> — getByText doesn't see
+    // form-control values, so assert on the textbox value directly.
+    await expect(page.getByRole("textbox").first()).toHaveValue(/\/ref\//, {
+      timeout: 10_000,
+    })
     await page.close()
   })
 

@@ -85,15 +85,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
-    const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
-    console.error("[stripe/checkout] error:", detail, err)
+    // Log the underlying error so it surfaces in Vercel runtime logs.
+    // The previous `catch {}` swallowed everything which made the env-var
+    // newline corruption invisible until we re-instrumented (2026-04-27).
+    console.error("[stripe/checkout] error:", err)
     return NextResponse.json(
-      {
-        error: "Une erreur est survenue. Réessaie dans un instant.",
-        ...(process.env.VERCEL_ENV !== "production" || process.env.STRIPE_DEBUG === "1"
-          ? { detail }
-          : {}),
-      },
+      { error: "Une erreur est survenue. Réessaie dans un instant." },
       { status: 500 },
     )
   }

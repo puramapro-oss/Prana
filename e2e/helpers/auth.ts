@@ -95,32 +95,66 @@ export async function deleteE2EUser(userId: string): Promise<void> {
 }
 
 /**
- * Sign in to /login by visiting an admin-generated magic link. After Supabase
- * redirects through /auth/callback, SSR cookies are planted on the context.
- * Returns the authenticated BrowserContext + user.
+ * Sign in by exchanging email+password for a session, then injecting the
+ * Supabase SSR cookie directly into the BrowserContext.
+ *
+ * We avoid the magic-link flow because admin.generateLink emits an implicit-
+ * grant URL (`#access_token=…` in the fragment) that our /auth/callback
+ * route — which only accepts `?code=…` from PKCE — will reject with
+ * `error=missing_code`.
+ *
+ * Cookie format follows @supabase/ssr v0.5+ which uses base64-prefixed,
+ * URL-encoded JSON (or the chunked variant with `.0`/`.1` suffixes if the
+ * value exceeds the chunk size). We always use the single-cookie form here:
+ * the session payload is small enough.
  */
 export async function signInE2E(
   browser: Browser,
   user: E2EUser,
 ): Promise<BrowserContext> {
-  const admin = adminClient()
-  const next = "/today"
-  const redirectTo = `${APP_URL}/auth/callback?next=${encodeURIComponent(next)}`
+  if (!SUPABASE_ANON_KEY) throw new Error("anon key missing")
 
-  const { data, error } = await admin.auth.admin.generateLink({
-    type: "magiclink",
+  const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+  const { data, error } = await anon.auth.signInWithPassword({
     email: user.email,
-    options: { redirectTo },
+    password: user.password,
   })
   if (error) throw error
-  const link = data.properties?.action_link
-  if (!link) throw new Error("generateLink returned no action_link")
+  if (!data.session) throw new Error("signInWithPassword returned no session")
+
+  const session = data.session
+  // @supabase/ssr cookie payload — same shape it writes itself.
+  const payload = {
+    access_token: session.access_token,
+    token_type: session.token_type,
+    expires_in: session.expires_in,
+    expires_at: session.expires_at,
+    refresh_token: session.refresh_token,
+    user: session.user,
+  }
+  const json = JSON.stringify(payload)
+  const cookieValue = "base64-" + Buffer.from(json, "utf8").toString("base64")
+
+  const url = new URL(SUPABASE_URL)
+  const projectRef = url.hostname.split(".")[0]
+  const cookieName = `sb-${projectRef}-auth-token`
+
+  const appHost = new URL(APP_URL).hostname
 
   const ctx = await browser.newContext()
-  const page = await ctx.newPage()
-  await page.goto(link, { waitUntil: "domcontentloaded" })
-  // Supabase redirects to /auth/callback?code=… → exchanges code → cookies planted
-  await page.waitForURL(/\/today(\?|$)/, { timeout: 30_000 })
-  await page.close()
+  await ctx.addCookies([
+    {
+      name: cookieName,
+      value: cookieValue,
+      domain: appHost,
+      path: "/",
+      httpOnly: false,
+      secure: true,
+      sameSite: "Lax",
+      expires: session.expires_at ?? Math.floor(Date.now() / 1000) + 3600,
+    },
+  ])
   return ctx
 }
