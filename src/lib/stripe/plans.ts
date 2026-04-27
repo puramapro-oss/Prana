@@ -39,6 +39,8 @@ export const PLANS: PlanDef[] = [
     priceMonthly: 29.99,
     priceYearly: 287.9, // 29.99 × 12 × 0.80
     ctaLabel: "Démarrer 7 jours Pro offerts",
+    stripePriceMonthlyId: process.env.STRIPE_PRICE_STARTER_MONTHLY,
+    stripePriceYearlyId: process.env.STRIPE_PRICE_STARTER_YEARLY,
     features: [
       "Tout illimité côté régulation",
       "5 exécutions IA par jour",
@@ -55,6 +57,8 @@ export const PLANS: PlanDef[] = [
     priceYearly: 662.4, // 69 × 12 × 0.80
     highlighted: true,
     ctaLabel: "Passer Pro",
+    stripePriceMonthlyId: process.env.STRIPE_PRICE_PRO_MONTHLY,
+    stripePriceYearlyId: process.env.STRIPE_PRICE_PRO_YEARLY,
     features: [
       "Tout illimité",
       "Twin complet (rebuild hebdo)",
@@ -71,6 +75,8 @@ export const PLANS: PlanDef[] = [
     priceMonthly: 99.99,
     priceYearly: 959.9, // 99.99 × 12 × 0.80
     ctaLabel: "Passer Ultime",
+    stripePriceMonthlyId: process.env.STRIPE_PRICE_ULTIME_MONTHLY,
+    stripePriceYearlyId: process.env.STRIPE_PRICE_ULTIME_YEARLY,
     features: [
       "Tout Pro",
       "Accès anticipé aux nouvelles features",
