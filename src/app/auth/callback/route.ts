@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { addDays } from "date-fns"
+
+const REF_COOKIE = "prana_ref"
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
   const next = searchParams.get("next") ?? "/today"
-  const ref = searchParams.get("ref")
+  const refQuery = searchParams.get("ref")
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)
@@ -19,6 +22,13 @@ export async function GET(request: Request) {
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
   }
+
+  // Read ref cookie (set by /r/[code]) — query param wins if both present.
+  const cookieStore = await cookies()
+  const refCookie = cookieStore.get(REF_COOKIE)?.value ?? null
+  const ref = refQuery ?? refCookie
+
+  const response = NextResponse.redirect(`${origin}${next}`)
 
   // Trial 7j Pro on first login + referral tracking
   if (data?.user) {
@@ -39,12 +49,15 @@ export async function GET(request: Request) {
         .eq("id", userId)
     }
 
-    // Referral attribution (only on first ever signup)
+    // Referral attribution: only on first ever signup, only if ref present and resolves
+    // to a different user. We accept either the new short referral_code (8 chars b58)
+    // or a raw user UUID for backwards-compat.
     if (ref && profile && !profile.onboarded_at) {
+      const lookupCol = /^[0-9a-fA-F-]{36}$/.test(ref) ? "id" : "referral_code"
       const { data: referrer } = await admin
         .from("profiles")
         .select("id")
-        .eq("id", ref)
+        .eq(lookupCol, ref)
         .maybeSingle()
 
       if (referrer && referrer.id !== userId) {
@@ -58,5 +71,13 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}${next}`)
+  // Always clear the ref cookie after callback so it never lingers.
+  response.cookies.set({
+    name: REF_COOKIE,
+    value: "",
+    maxAge: 0,
+    path: "/",
+  })
+
+  return response
 }

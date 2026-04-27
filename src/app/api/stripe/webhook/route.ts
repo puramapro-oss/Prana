@@ -2,6 +2,9 @@ import { NextResponse, type NextRequest } from "next/server"
 import type Stripe from "stripe"
 import { stripe } from "@/lib/stripe/client"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { grantPoints } from "@/lib/redistribution/points"
+import { addDays } from "date-fns"
+import type { Referral } from "@/lib/supabase/types"
 
 export const runtime = "nodejs"
 
@@ -76,6 +79,45 @@ export async function POST(req: NextRequest) {
             trial_ends_at: trialEndsAt,
           })
           .eq("stripe_customer_id", customerId)
+
+        // Referral conversion: only on subscription.created (not updated), and only
+        // if the active subscription actually means the user is paying (status active/trialing).
+        // We look up the user_id from customerId, then find a pending referral for this referee.
+        if (event.type === "customer.subscription.created" && (sub.status === "active" || sub.status === "trialing")) {
+          const { data: profile } = await admin
+            .from("profiles")
+            .select("id, trial_ends_at")
+            .eq("stripe_customer_id", customerId)
+            .maybeSingle()
+          const refereeProfile = profile as { id: string; trial_ends_at: string | null } | null
+          if (refereeProfile) {
+            const { data: pending } = await admin
+              .from("referrals")
+              .select("id, referrer_id, referee_id, status")
+              .eq("referee_id", refereeProfile.id)
+              .eq("status", "pending")
+              .maybeSingle()
+            const pendingRow = pending as Pick<Referral, "id" | "referrer_id" | "referee_id" | "status"> | null
+            if (pendingRow) {
+              const grant = await grantPoints(pendingRow.referrer_id, "referral_converted", {
+                referee_id: pendingRow.referee_id,
+                subscription_id: sub.id,
+              })
+              const extendedTrial = addDays(new Date(), 30).toISOString()
+              await admin
+                .from("profiles")
+                .update({ trial_ends_at: extendedTrial })
+                .eq("id", refereeProfile.id)
+              await admin
+                .from("referrals")
+                .update({
+                  status: "converted",
+                  reward_points: grant.granted,
+                })
+                .eq("id", pendingRow.id)
+            }
+          }
+        }
         break
       }
       case "customer.subscription.deleted": {
