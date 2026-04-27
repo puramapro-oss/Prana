@@ -1,0 +1,15 @@
+appId: dev.purama.prana
+name: Settings tab — list rows + logout confirm
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- tapOn: "Réglages"
+- assertVisible: "Connecté en tant que"
+- assertVisible:
+    id: "row-billing"
+- assertVisible:
+    id: "row-data"
+- tapOn:
+    id: "logout"
+- assertVisible: "Se déconnecter ?"
+- tapOn: "Annuler"

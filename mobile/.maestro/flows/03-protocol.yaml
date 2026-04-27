@@ -1,0 +1,15 @@
+appId: dev.purama.prana
+name: Protocol player — start 4-7-8, see breathing circle, stop
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- tapOn:
+    id: "open-magic"
+- assertVisible: "12 protocoles guidés"
+- tapOn:
+    id: "protocol-478-breath"
+- tapOn:
+    id: "protocol-start"
+- assertVisible: "Inspire 4s"
+- tapOn:
+    id: "protocol-stop"

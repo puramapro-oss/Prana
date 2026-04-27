@@ -1,0 +1,13 @@
+appId: dev.purama.prana
+name: Auth flow — magic link form visible + tap goes to inbox state
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "login-screen"
+- tapOn:
+    id: "login-email"
+- inputText: "test+maestro@purama.dev"
+- tapOn:
+    id: "login-magic-link"
+- assertVisible: "Lien envoyé."

@@ -1,0 +1,13 @@
+appId: dev.purama.prana
+name: Regulate filters — switch categories
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- tapOn:
+    id: "open-magic"
+- tapOn:
+    id: "filter-focus"
+- assertVisible: "Respiration carrée"
+- tapOn:
+    id: "filter-sommeil"
+- assertVisible: "Coucher apaisé"

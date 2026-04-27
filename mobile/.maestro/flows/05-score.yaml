@@ -1,0 +1,10 @@
+appId: dev.purama.prana
+name: Score tab — streak + 3 stats visible
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- tapOn: "Score"
+- assertVisible: "7 derniers jours"
+- assertVisible: "Calme"
+- assertVisible: "Énergie"
+- assertVisible: "Focus"

@@ -1,0 +1,14 @@
+appId: dev.purama.prana
+name: Pulse Check — pick stress + energy + submit
+tags: [smoke]
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- assertVisible: "Pulse du jour"
+- tapOn:
+    id: "pulse-stress-2"
+- tapOn:
+    id: "pulse-energy-4"
+- tapOn:
+    id: "pulse-submit"
+- assertVisible: "Suggestion"

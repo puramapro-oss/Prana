@@ -1,0 +1,12 @@
+name: build-preview
+on:
+  push:
+    branches: [main]
+    paths: [mobile/**]
+jobs:
+  build:
+    name: Build preview iOS + Android
+    type: build
+    params:
+      profile: preview
+      platform: all

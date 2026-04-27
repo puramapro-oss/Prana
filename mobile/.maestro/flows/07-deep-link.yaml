@@ -1,0 +1,8 @@
+appId: dev.purama.prana
+name: Deep link — prana://regulate opens regulate tab
+---
+- launchApp:
+    clearState: true
+- runFlow: ./_login-helper.yaml
+- openLink: "prana://regulate"
+- assertVisible: "12 protocoles guidés"

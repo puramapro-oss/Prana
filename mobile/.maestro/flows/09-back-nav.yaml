@@ -1,0 +1,12 @@
+appId: dev.purama.prana
+name: Navigation — back from protocol returns to list
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- tapOn:
+    id: "open-magic"
+- tapOn:
+    id: "protocol-coherence"
+- tapOn:
+    id: "protocol-back"
+- assertVisible: "12 protocoles guidés"

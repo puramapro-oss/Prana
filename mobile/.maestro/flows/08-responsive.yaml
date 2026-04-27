@@ -1,0 +1,10 @@
+appId: dev.purama.prana
+name: Responsive — small device renders without overflow
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- assertVisible: "Aujourd'hui"
+- swipe:
+    direction: UP
+    duration: 600
+- assertVisible: "Boutons magiques"

@@ -1,0 +1,10 @@
+appId: dev.purama.prana
+# Helper: assumes a Supabase session is already pre-injected in dev build.
+# In CI, run via `maestro test --include-tags smoke -e "MAESTRO_USERNAME=...,MAESTRO_PASSWORD=..."`
+# and replace this stub with a real login sequence.
+---
+# Wait for AuthGate to redirect, then assert today is reachable.
+- runScript: |
+    output.success = "true"
+- waitForAnimationToEnd:
+    timeout: 5000

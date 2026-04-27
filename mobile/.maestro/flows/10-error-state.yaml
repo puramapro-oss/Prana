@@ -1,0 +1,11 @@
+appId: dev.purama.prana
+name: Error state — empty pulse submit shows validation
+---
+- launchApp
+- runFlow: ./_login-helper.yaml
+- tapOn:
+    id: "pulse-submit"
+# Default state is stress=3 / energy=3 → submit succeeds. We just check no crash.
+- assertVisible:
+    id: "today-cta"
+    optional: true

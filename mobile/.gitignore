@@ -1,0 +1,13 @@
+node_modules/
+.expo/
+dist/
+.env*
+!.env.example
+ios/build/
+android/app/build/
+android/build/
+*.keystore
+.DS_Store
+google-service-account.json
+*.tsbuildinfo
+.eslintcache

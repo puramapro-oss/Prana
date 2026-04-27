@@ -1,0 +1,18 @@
+name: release
+on:
+  push:
+    tags: ["mobile-v*"]
+jobs:
+  build:
+    name: Build production
+    type: build
+    params:
+      profile: production
+      platform: all
+  submit:
+    name: Submit to stores
+    type: submit
+    needs: build
+    params:
+      profile: production
+      platform: all
