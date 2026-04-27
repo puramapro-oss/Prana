@@ -70,6 +70,6 @@ export const config = {
      * - favicon, sitemap, robots
      * - api routes (handled by their own auth)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api|r/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api|ref/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 }

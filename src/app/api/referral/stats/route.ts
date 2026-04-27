@@ -57,7 +57,7 @@ export async function GET() {
       .reduce((acc, r) => acc + (r.reward_points ?? 500), 0)
 
     const baseHost = process.env.NEXT_PUBLIC_APP_URL ?? "https://prana.purama.dev"
-    const shareUrl = referralCode ? `${baseHost}/r/${referralCode}` : null
+    const shareUrl = referralCode ? `${baseHost}/ref/${referralCode}` : null
 
     const payload: ReferralStats = {
       ok: true,
