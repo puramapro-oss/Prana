@@ -1,10 +1,22 @@
 appId: dev.purama.prana
-# Helper: assumes a Supabase session is already pre-injected in dev build.
-# In CI, run via `maestro test --include-tags smoke -e "MAESTRO_USERNAME=...,MAESTRO_PASSWORD=..."`
-# and replace this stub with a real login sequence.
+# Login helper for Maestro flows.
+#
+# Strategy: dev builds expose a hidden deep link `prana://e2e/session?token=<jwt>`
+# that calls supabase.auth.setSession({ access_token, refresh_token }) and
+# reloads the auth gate. Maestro injects the token via env at run-time.
+#
+# In CI: `MAESTRO_E2E_TOKEN=$(node scripts/maestro-mint-token.mjs)`
+# (the script signs in a dedicated test account and prints `accessToken|refreshToken`).
+#
+# Local dev: just `expo start` with EXPO_PUBLIC_E2E_BYPASS=1 — the auth gate
+# accepts the env user automatically. See `mobile/app/_layout.tsx` AuthGate.
 ---
-# Wait for AuthGate to redirect, then assert today is reachable.
-- runScript: |
-    output.success = "true"
-- waitForAnimationToEnd:
-    timeout: 5000
+- runFlow:
+    when:
+      visible:
+        id: "login-screen"
+    commands:
+      - openLink: "prana://e2e/session?token=${MAESTRO_E2E_TOKEN}"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - assertVisible: "Aujourd'hui"

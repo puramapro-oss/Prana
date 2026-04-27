@@ -7,6 +7,9 @@ import { Sparkles, Activity, Wind } from "lucide-react-native"
 import { Button } from "@/components/Button"
 import { GlassCard } from "@/components/GlassCard"
 import { PulseSlider } from "@/components/PulseSlider"
+import { MagicButtonGrid } from "@/components/MagicButtonGrid"
+import { MagicButtonModal } from "@/components/MagicButtonModal"
+import type { MagicButtonSlug, Plan } from "@/lib/magic-buttons"
 import { useCreatePulse, fetchLastPulse, type PulseCheckRow } from "@/hooks/usePulse"
 import { useAuth } from "@/hooks/useAuth"
 import { colors } from "@/lib/theme"
@@ -32,7 +35,9 @@ export default function TodayScreen() {
   const [loading, setLoading] = useState(true)
   const [stress, setStress] = useState(3)
   const [energy, setEnergy] = useState(3)
+  const [openSlug, setOpenSlug] = useState<MagicButtonSlug | null>(null)
   const { submit, pending } = useCreatePulse()
+  const plan: Plan = (user?.user_metadata?.plan as Plan | undefined) ?? "free"
 
   useEffect(() => {
     let active = true
@@ -106,23 +111,13 @@ export default function TodayScreen() {
           </GlassCard>
         )}
 
-        <GlassCard className="p-6 mb-4">
-          <View className="flex-row items-center gap-2 mb-2">
-            <Wind size={16} color={colors.primary} strokeWidth={1.6} />
-            <Text className="text-muted text-xs uppercase tracking-wider">Boutons magiques</Text>
-          </View>
-          <Text className="text-ivory text-base mb-4">
-            12 actions guidées par l&apos;IA pour stabiliser un état précis.
-          </Text>
-          <Button
-            testID="open-magic"
-            onPress={() => router.push("/(tabs)/regulate")}
-            variant="secondary"
-          >
-            Ouvrir les boutons
-          </Button>
-        </GlassCard>
+        <View className="flex-row items-center gap-2 mb-3">
+          <Wind size={16} color={colors.primary} strokeWidth={1.6} />
+          <Text className="text-muted text-xs uppercase tracking-wider">Boutons magiques</Text>
+        </View>
+        <MagicButtonGrid plan={plan} onPick={(slug) => setOpenSlug(slug)} />
       </ScrollView>
+      <MagicButtonModal slug={openSlug} onClose={() => setOpenSlug(null)} />
     </SafeAreaView>
   )
 }

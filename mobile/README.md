@@ -47,7 +47,17 @@ GitHub Actions / EAS Workflows under `.eas/workflows/`:
 maestro test .maestro/flows
 ```
 
-10 flows cover auth surface, pulse, protocol player, regulate filters, score, settings, deep links, responsive, back nav, error state. `_login-helper.yaml` is a stub — replace with a real auth sequence (or pre-inject session) for CI.
+10 flows cover auth surface, pulse, protocol player, regulate filters, score, settings, deep links, responsive, back nav, error state.
+
+`_login-helper.yaml` injects a pre-minted Supabase session via deep link `prana://e2e/session?token=<access>\t<refresh>`. The deep link is only honored when `EXPO_PUBLIC_E2E_BYPASS=1` (dev/preview builds only — production rejects).
+
+CI sequence:
+```bash
+TOKEN=$(node ../scripts/maestro-mint-token.mjs)
+MAESTRO_E2E_TOKEN="$TOKEN" maestro test mobile/.maestro/flows
+```
+
+`scripts/maestro-mint-token.mjs` signs in with `MAESTRO_TEST_EMAIL` + `MAESTRO_TEST_PASSWORD` and prints `access_token<TAB>refresh_token` to stdout.
 
 ## Routes
 
@@ -60,16 +70,22 @@ maestro test .maestro/flows
 - `/protocol/[slug]` — animated breathing circle player (Reanimated 4)
 - `/+not-found`
 
-## What's NOT yet wired (post-bootstrap work)
+## What's wired now (v2.0.1)
 
-1. **Magic Buttons modal** — needs `/api/agent/magic-button` integration. Currently only the regulate list is reachable.
-2. **LifeOS Capture (voice)** — `expo-av` recorder + Whisper upload. Web flow already works; native port pending.
-3. **Push notifications** — `expo-notifications` registration + APNs/FCM tokens persisted to `push_tokens` table.
-4. **HealthKit / Health Connect** — read steps/HRV/sleep, write Mindful Minutes after each protocol.
-5. **Real `_login-helper.yaml`** — Maestro CI auth sequence (or session injection).
-6. **Real EAS projectId** — replace `00000000-…` in `app.json` after `eas init`.
-7. **Real APPLE_TEAM_ID + ascAppId** in `eas.json`.
-8. **Icons** — `assets/icon.png`, `splash-icon.png`, `adaptive-icon.png` (Pollinations + sharp).
+1. **Magic Buttons modal** ✅ — `/api/agent/magic-button` integration via `apiFetch` helper. 12 buttons grid on Today screen with plan-gated lock icons. Modal supports context input, copy, share, fallback handling.
+2. **Maestro CI auth** ✅ — pre-mint token via `scripts/maestro-mint-token.mjs` + deep link injection in dev/preview builds.
+3. **Icons** ✅ — auto-generated via `node scripts/generate-icons.mjs` (web + mobile). Re-run with `--skip-existing` to top-up failed Pollinations 429 hits.
+
+## What's NOT yet wired (need manual Tissma steps)
+
+1. **LifeOS Capture (voice)** — `expo-av` recorder + Whisper upload. Web flow already works; native port pending.
+2. **Push notifications** — `expo-notifications` registration + APNs/FCM tokens persisted to `push_tokens` table.
+3. **HealthKit / Health Connect read** — read steps/HRV/sleep (write Mindful Minutes already structured in watch).
+4. **Real EAS projectId** — run `eas init` once → writes into `app.json`.
+5. **Real APPLE_TEAM_ID + ascAppId** in `eas.json` after first build to App Store Connect.
+6. **GoogleService-account.json** — download from Google Cloud Console, place at `mobile/google-service-account.json`.
+
+See `.env.example` for the exact commands per credential.
 
 ## Apple Watch / Wear OS
 
