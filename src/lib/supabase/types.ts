@@ -53,6 +53,7 @@ export type Database = {
           trial_ends_at: string | null
           onboarded_at: string | null
           metadata: Json
+          referral_code: string | null
           created_at: string
           updated_at: string
         }
@@ -68,6 +69,7 @@ export type Database = {
           trial_ends_at?: string | null
           onboarded_at?: string | null
           metadata?: Json
+          referral_code?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -83,7 +85,107 @@ export type Database = {
           trial_ends_at?: string | null
           onboarded_at?: string | null
           metadata?: Json
+          referral_code?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          id: string
+          slug: string
+          name_fr: string
+          name_en: string
+          description_fr: string | null
+          description_en: string | null
+          duration_days: number
+          category: string
+          daily_action_template: Json | null
+          created_by: string | null
+          is_official: boolean
+          is_premium: boolean
+          cover_image_url: string | null
+          participants_count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name_fr: string
+          name_en: string
+          description_fr?: string | null
+          description_en?: string | null
+          duration_days: number
+          category: string
+          daily_action_template?: Json | null
+          created_by?: string | null
+          is_official?: boolean
+          is_premium?: boolean
+          cover_image_url?: string | null
+          participants_count?: number
+          created_at?: string
+        }
+        Update: {
+          name_fr?: string
+          name_en?: string
+          description_fr?: string | null
+          description_en?: string | null
+          duration_days?: number
+          category?: string
+          daily_action_template?: Json | null
+          is_official?: boolean
+          is_premium?: boolean
+          cover_image_url?: string | null
+          participants_count?: number
+        }
+        Relationships: []
+      }
+      room_memberships: {
+        Row: {
+          id: string
+          room_id: string
+          user_id: string
+          joined_at: string
+          current_day: number
+          completed: boolean
+          invited_by: string | null
+        }
+        Insert: {
+          id?: string
+          room_id: string
+          user_id: string
+          joined_at?: string
+          current_day?: number
+          completed?: boolean
+          invited_by?: string | null
+        }
+        Update: {
+          current_day?: number
+          completed?: boolean
+        }
+        Relationships: []
+      }
+      room_messages: {
+        Row: {
+          id: string
+          room_id: string
+          user_id: string | null
+          is_ai_host: boolean
+          body: string
+          day_number: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          room_id: string
+          user_id?: string | null
+          is_ai_host?: boolean
+          body: string
+          day_number?: number | null
+          created_at?: string
+        }
+        Update: {
+          body?: string
         }
         Relationships: []
       }
@@ -703,6 +805,29 @@ export type PointEventInsert = PranaTables["point_events"]["Insert"]
 export type Referral = PranaTables["referrals"]["Row"]
 export type ReferralInsert = PranaTables["referrals"]["Insert"]
 export type ReferralUpdate = PranaTables["referrals"]["Update"]
+
+export type Room = PranaTables["rooms"]["Row"]
+export type RoomInsert = PranaTables["rooms"]["Insert"]
+export type RoomUpdate = PranaTables["rooms"]["Update"]
+
+export type RoomMembership = PranaTables["room_memberships"]["Row"]
+export type RoomMembershipInsert = PranaTables["room_memberships"]["Insert"]
+export type RoomMembershipUpdate = PranaTables["room_memberships"]["Update"]
+
+export type RoomMessage = PranaTables["room_messages"]["Row"]
+export type RoomMessageInsert = PranaTables["room_messages"]["Insert"]
+
+/**
+ * Strongly-typed shape of one entry inside `rooms.daily_action_template` JSONB.
+ * The template is an array of these (one per day).
+ */
+export interface RoomDayAction {
+  day: number
+  title: string
+  action: string
+  why: string
+  energy: EnergyRequired
+}
 
 /**
  * Strongly-typed shape of `profiles.metadata` JSONB.
