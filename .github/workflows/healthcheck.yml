@@ -1,0 +1,35 @@
+name: prod healthcheck
+
+# Hourly ping of /api/status — catches the kind of silent outages we hit on
+# 2026-04-27 (gotrue container down, NULL token columns, env var \n drift).
+# /api/status now exercises GoTrue write path + Stripe /v1/account, so this
+# is a real end-to-end probe, not just a latency check.
+
+on:
+  schedule:
+    - cron: "0 * * * *" # top of every hour
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: GET /api/status
+        run: |
+          set -euo pipefail
+          BODY=$(curl -fsS --max-time 15 "https://prana.purama.dev/api/status?n=$RANDOM")
+          echo "$BODY"
+          OK=$(echo "$BODY" | python3 -c "import sys,json; print(json.load(sys.stdin).get('ok'))")
+          if [ "$OK" != "True" ]; then
+            echo "::error::healthcheck failed — see body above"
+            exit 1
+          fi
+          for k in supabase auth anthropic stripe; do
+            v=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin)['checks']['$k']; print(d.get('ok'))")
+            if [ "$v" != "True" ]; then
+              echo "::error::$k.ok=$v in /api/status"
+              exit 2
+            fi
+          done
+          echo "✓ all four sub-checks green"
