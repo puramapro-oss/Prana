@@ -84,9 +84,16 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ url: session.url })
-  } catch {
+  } catch (err) {
+    const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
+    console.error("[stripe/checkout] error:", detail, err)
     return NextResponse.json(
-      { error: "Une erreur est survenue. Réessaie dans un instant." },
+      {
+        error: "Une erreur est survenue. Réessaie dans un instant.",
+        ...(process.env.VERCEL_ENV !== "production" || process.env.STRIPE_DEBUG === "1"
+          ? { detail }
+          : {}),
+      },
       { status: 500 },
     )
   }
