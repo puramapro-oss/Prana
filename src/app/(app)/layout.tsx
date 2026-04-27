@@ -3,6 +3,8 @@ import Link from "next/link"
 import { Wind } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { SOSFloatingButton } from "@/components/safety/sos-floating-button"
+import { ProConsultPrompt } from "@/components/safety/pro-consult-prompt"
+import { shouldShowConsultPrompt } from "@/lib/safety/consult-prompt-gate"
 import { Sidebar } from "@/components/layout/sidebar"
 import { BottomTabs } from "@/components/layout/bottom-tabs"
 import { PulseCheckCompact } from "@/components/pulse/pulse-check-compact"
@@ -23,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const displayName = profile?.display_name ?? user.email?.split("@")[0] ?? "toi"
   const plan = profile?.plan ?? "free"
+  const showConsultPrompt = await shouldShowConsultPrompt(user.id)
 
   return (
     <div className="min-h-svh">
@@ -50,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <BottomTabs />
       <SOSFloatingButton />
+      <ProConsultPrompt defaultOpen={showConsultPrompt} />
     </div>
   )
 }

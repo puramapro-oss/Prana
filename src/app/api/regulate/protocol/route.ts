@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { apiLimiter } from "@/lib/upstash"
 import { findProtocol } from "@/lib/regulate/protocols"
 import { checkDailyQuota } from "@/lib/quotas"
+import { grantPoints } from "@/lib/redistribution/points"
 import type { Plan } from "@/lib/supabase/types"
 
 const StartSchema = z.object({
@@ -139,7 +140,18 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       )
     }
-    return NextResponse.json({ ok: true })
+
+    let pointsGranted = 0
+    try {
+      const grant = await grantPoints(user.id, "protocol_done", {
+        session_id: parsed.data.session_id,
+      })
+      if (grant.ok) pointsGranted = grant.granted
+    } catch (err) {
+      console.error("[api/regulate] points", err)
+    }
+
+    return NextResponse.json({ ok: true, pointsGranted })
   } catch (e) {
     console.error("[api/regulate]", e)
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 })

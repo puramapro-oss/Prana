@@ -11,6 +11,7 @@ import { loadTwin, toTwinSnapshot } from "@/lib/agent/twin-loader"
 import { MAGIC_BUTTON_PROMPTS, JSON_OUTPUT_INSTRUCTION, type MagicButtonResponse } from "@/lib/agent/prompts/magic-buttons"
 import { classifyForSafety } from "@/lib/safety/classifier"
 import { logSafetyEvent, escalationHint } from "@/lib/safety/escalation"
+import { grantPoints } from "@/lib/redistribution/points"
 import type { Plan, PulseCheck, Profile } from "@/lib/supabase/types"
 
 const Schema = z.object({
@@ -175,6 +176,17 @@ export async function POST(req: NextRequest) {
       fallback_used: fallbackUsed,
     })
 
+    // Points : +5 only when the IA call succeeded (no fallback). Fail-soft.
+    let pointsGranted = 0
+    if (!fallbackUsed) {
+      try {
+        const grant = await grantPoints(user.id, "magic_button", { button_slug: button.slug })
+        if (grant.ok) pointsGranted = grant.granted
+      } catch (err) {
+        console.error("[api/magic-button] points", err)
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       button: { slug: button.slug, name: button.name },
@@ -182,6 +194,7 @@ export async function POST(req: NextRequest) {
       fallback_used: fallbackUsed,
       safetyRedirect,
       quota: { used: quota.used + 1, limit: quota.limit, unlimited: quota.unlimited },
+      pointsGranted,
     })
   } catch (e) {
     console.error("[api/magic-button]", e)

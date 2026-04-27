@@ -16,6 +16,12 @@ export type EnergyRequired = "low" | "medium" | "high"
 export type CaptureSource = "text" | "voice" | "image" | "email" | "share"
 export type ExecutionType = "message" | "email" | "post" | "plan" | "doc" | "script"
 export type SafetySeverity = "low" | "medium" | "high" | "critical"
+export type SafetyTrigger =
+  | "sos_button"
+  | "classifier_flag"
+  | "keyword_match"
+  | "consult_prompt"
+  | "user_self_report"
 export type ReferralStatus = "pending" | "converted" | "rewarded"
 export type TimeAvailable = "20s" | "2min" | "10min" | "1h"
 export type PulseContext = "home" | "work" | "outside" | "transit" | "bed" | "other"
@@ -46,6 +52,7 @@ export type Database = {
           stripe_subscription_id: string | null
           trial_ends_at: string | null
           onboarded_at: string | null
+          metadata: Json
           created_at: string
           updated_at: string
         }
@@ -60,6 +67,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
           onboarded_at?: string | null
+          metadata?: Json
           created_at?: string
           updated_at?: string
         }
@@ -74,6 +82,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
           onboarded_at?: string | null
+          metadata?: Json
           updated_at?: string
         }
         Relationships: []
@@ -470,6 +479,149 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_scores: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          stress_avg: number | null
+          energy_avg: number | null
+          sleep_quality: number | null
+          focus_minutes: number
+          one_action_done: boolean
+          micro_actions_done: number
+          protocols_done: number
+          streak_days: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          date: string
+          stress_avg?: number | null
+          energy_avg?: number | null
+          sleep_quality?: number | null
+          focus_minutes?: number
+          one_action_done?: boolean
+          micro_actions_done?: number
+          protocols_done?: number
+          streak_days?: number
+          created_at?: string
+        }
+        Update: {
+          stress_avg?: number | null
+          energy_avg?: number | null
+          sleep_quality?: number | null
+          focus_minutes?: number
+          one_action_done?: boolean
+          micro_actions_done?: number
+          protocols_done?: number
+          streak_days?: number
+        }
+        Relationships: []
+      }
+      safety_events: {
+        Row: {
+          id: string
+          user_id: string | null
+          trigger: SafetyTrigger
+          severity: SafetySeverity | null
+          context_text: string | null
+          hotlines_shown: string[] | null
+          pro_referred: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          trigger: SafetyTrigger
+          severity?: SafetySeverity | null
+          context_text?: string | null
+          hotlines_shown?: string[] | null
+          pro_referred?: boolean
+          created_at?: string
+        }
+        Update: {
+          severity?: SafetySeverity | null
+          context_text?: string | null
+          hotlines_shown?: string[] | null
+          pro_referred?: boolean
+        }
+        Relationships: []
+      }
+      user_points: {
+        Row: {
+          user_id: string
+          points: number
+          cash_eur_centimes: number
+          total_earned: number
+          total_redeemed: number
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          points?: number
+          cash_eur_centimes?: number
+          total_earned?: number
+          total_redeemed?: number
+          updated_at?: string
+        }
+        Update: {
+          points?: number
+          cash_eur_centimes?: number
+          total_earned?: number
+          total_redeemed?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      point_events: {
+        Row: {
+          id: string
+          user_id: string
+          delta: number
+          reason: string
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          delta: number
+          reason: string
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          delta?: number
+          reason?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          id: string
+          referrer_id: string
+          referee_id: string
+          status: ReferralStatus
+          reward_points: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          referrer_id: string
+          referee_id: string
+          status?: ReferralStatus
+          reward_points?: number | null
+          created_at?: string
+        }
+        Update: {
+          status?: ReferralStatus
+          reward_points?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: { [k: string]: never }
     Functions: { [k: string]: never }
@@ -533,6 +685,44 @@ export type ExecutionUpdate = PranaTables["executions"]["Update"]
 export type TwinProfile = PranaTables["twin_profiles"]["Row"]
 export type TwinProfileInsert = PranaTables["twin_profiles"]["Insert"]
 export type TwinProfileUpdate = PranaTables["twin_profiles"]["Update"]
+
+export type DailyScore = PranaTables["daily_scores"]["Row"]
+export type DailyScoreInsert = PranaTables["daily_scores"]["Insert"]
+export type DailyScoreUpdate = PranaTables["daily_scores"]["Update"]
+
+export type SafetyEvent = PranaTables["safety_events"]["Row"]
+export type SafetyEventInsert = PranaTables["safety_events"]["Insert"]
+
+export type UserPoints = PranaTables["user_points"]["Row"]
+export type UserPointsInsert = PranaTables["user_points"]["Insert"]
+export type UserPointsUpdate = PranaTables["user_points"]["Update"]
+
+export type PointEvent = PranaTables["point_events"]["Row"]
+export type PointEventInsert = PranaTables["point_events"]["Insert"]
+
+export type Referral = PranaTables["referrals"]["Row"]
+export type ReferralInsert = PranaTables["referrals"]["Insert"]
+export type ReferralUpdate = PranaTables["referrals"]["Update"]
+
+/**
+ * Strongly-typed shape of `profiles.metadata` JSONB.
+ * All fields optional. Engine code reads with `?? defaults`.
+ */
+export interface ProfileMetadata {
+  emergency_contact?: {
+    name: string
+    phone: string
+    relationship?: string | null
+  } | null
+  notif_prefs?: {
+    push_enabled?: boolean
+    email_enabled?: boolean
+    sms_enabled?: boolean
+    daily_reminder_hour?: number | null
+  } | null
+  safety_country?: "FR" | "US" | "INTL" | null
+  last_pro_consult_prompt_at?: string | null
+}
 
 /**
  * Strongly-typed shape of `twin_profiles.communication_style` JSONB.

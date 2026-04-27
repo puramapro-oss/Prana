@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { pulseLimiter } from "@/lib/upstash"
 import { classifyForSafety } from "@/lib/safety/classifier"
 import { logSafetyEvent, escalationHint } from "@/lib/safety/escalation"
+import { grantPoints, hasGrantedToday } from "@/lib/redistribution/points"
 
 const TIME_VALUES = ["20s", "2min", "10min", "1h"] as const
 const CONTEXT_VALUES = ["home", "work", "outside", "transit", "bed", "other"] as const
@@ -81,7 +82,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    return NextResponse.json({ ok: true, pulse: data, safetyRedirect })
+    // Points : +10 once per UTC day for daily_pulse. Fail-soft.
+    let pointsGranted = 0
+    try {
+      const already = await hasGrantedToday(user.id, "daily_pulse")
+      if (!already) {
+        const grant = await grantPoints(user.id, "daily_pulse", { pulse_id: data.id })
+        if (grant.ok) pointsGranted = grant.granted
+      }
+    } catch (err) {
+      console.error("[api/pulse-check] points", err)
+    }
+
+    return NextResponse.json({ ok: true, pulse: data, safetyRedirect, pointsGranted })
   } catch (e) {
     console.error("[api/pulse-check]", e)
     return NextResponse.json(

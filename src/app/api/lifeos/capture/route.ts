@@ -8,6 +8,7 @@ import { transcribeAudio } from "@/lib/agent/openai-whisper"
 import { classifyForSafety } from "@/lib/safety/classifier"
 import { logSafetyEvent, escalationHint } from "@/lib/safety/escalation"
 import { classifyCapture } from "@/lib/lifeos/classifier-runner"
+import { grantPoints, hasGrantedToday } from "@/lib/redistribution/points"
 import type {
   Capture,
   CaptureSource,
@@ -178,7 +179,21 @@ export async function POST(req: NextRequest) {
     // Fire-and-forget classification (we don't await — UI shows pending state)
     void classifyCaptureAsync(insertedCapture.id)
 
-    const payload: CaptureResultPayload = {
+    // Points : +3 once/day for the first capture (gentle reward, encourages habit). Fail-soft.
+    let pointsGranted = 0
+    try {
+      const already = await hasGrantedToday(user.id, "capture_first")
+      if (!already) {
+        const grant = await grantPoints(user.id, "capture_first", {
+          capture_id: insertedCapture.id,
+        })
+        if (grant.ok) pointsGranted = grant.granted
+      }
+    } catch (err) {
+      console.error("[api/lifeos/capture] points", err)
+    }
+
+    const payload: CaptureResultPayload & { pointsGranted: number } = {
       ok: true,
       capture: insertedCapture,
       classification_pending: true,
@@ -188,6 +203,7 @@ export async function POST(req: NextRequest) {
         limit: quota.limit,
         unlimited: quota.unlimited,
       },
+      pointsGranted,
     }
 
     return NextResponse.json(payload)
