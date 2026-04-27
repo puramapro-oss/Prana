@@ -1,7 +1,9 @@
 import Link from "next/link"
 import Script from "next/script"
 import { ArrowRight, Wind, Sparkles, Brain, ListChecks, Users } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { Button } from "@/components/ui/button"
+import { LangSwitcher } from "@/components/shared/lang-switcher"
 import { PLANS } from "@/lib/stripe/plans"
 import { formatPrice } from "@/lib/utils"
 
@@ -43,7 +45,19 @@ const jsonLd = {
   ],
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const tNav = await getTranslations("Nav")
+  const tFooter = await getTranslations("Footer")
+  const tLanding = await getTranslations("Landing")
+  const tCommon = await getTranslations("Common")
+
+  const diffItems = [
+    { icon: Wind, key: "regulate" },
+    { icon: ListChecks, key: "organize" },
+    { icon: Brain, key: "execute" },
+    { icon: Users, key: "stabilize" },
+  ] as const
+
   return (
     <div className="min-h-svh">
       <Script
@@ -60,22 +74,23 @@ export default function HomePage() {
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <Link href="/manifesto" className="text-muted-foreground hover:text-foreground transition-colors">
-            Manifesto
+            {tNav("manifesto")}
           </Link>
           <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-            Tarifs
+            {tNav("pricing")}
           </Link>
           <Link href="/safety" className="text-muted-foreground hover:text-foreground transition-colors">
-            Sécurité
+            {tNav("safety")}
           </Link>
         </nav>
         <div className="flex items-center gap-2">
+          <LangSwitcher />
           <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Se connecter</Link>
+            <Link href="/login">{tNav("login")}</Link>
           </Button>
           <Button asChild size="sm">
             <Link href="/signup">
-              Commencer
+              {tNav("signup")}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -87,72 +102,52 @@ export default function HomePage() {
       <section className="container-calm pt-16 pb-20 md:pt-28 md:pb-32 text-center">
         <div className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-6">
           <Sparkles className="size-3.5" strokeWidth={1.8} />
-          Le premier OS humain
+          {tLanding("badge")}
         </div>
         <h1 className="font-heading text-5xl md:text-7xl tracking-tight max-w-4xl mx-auto leading-[1.05]">
-          Calme instantané.
+          {tLanding("h1Line1")}
           <br />
-          Clarté totale.
+          {tLanding("h1Line2")}
           <br />
-          <span className="text-primary">Exécution automatique.</span>
+          <span className="text-primary">{tLanding("h1Line3")}</span>
         </h1>
         <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Régule ton système nerveux en 20 secondes. Organise ta vie. Laisse l&apos;IA exécuter pour toi. Un
-          seul système, en synergie totale.
+          {tLanding("subtitle")}
         </p>
         <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="h-12 px-6 text-base">
             <Link href="/signup">
-              Commencer — 7 jours Pro offerts
+              {tLanding("ctaPrimary")}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base">
-            <Link href="/manifesto">Lire le manifeste</Link>
+            <Link href="/manifesto">{tLanding("ctaSecondary")}</Link>
           </Button>
         </div>
-        <p className="mt-4 text-xs text-muted-foreground">Sans carte bancaire. Annule à tout moment.</p>
+        <p className="mt-4 text-xs text-muted-foreground">{tCommon("noCard")}</p>
       </section>
 
       {/* 4 DIFFÉRENCIATEURS */}
       <section className="container-calm py-20 md:py-28">
         <div className="text-center mb-14">
           <h2 className="font-heading text-3xl md:text-4xl tracking-tight">
-            Quatre choses, en synergie totale.
+            {tLanding("diff.title")}
           </h2>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Personne ne fait les quatre ensemble. PURAMA ONE, oui.
+            {tLanding("diff.subtitle")}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              icon: Wind,
-              title: "Régule",
-              desc: "20 secondes à 3 minutes. Protocoles guidés pour ramener le calme avant tout.",
-            },
-            {
-              icon: ListChecks,
-              title: "Organise",
-              desc: "LifeOS : tâches, projets, personnes, notes. Capture vocale, classement automatique.",
-            },
-            {
-              icon: Brain,
-              title: "Exécute",
-              desc: "L'agent IA rédige tes messages, mails, plans, docs. Tu approuves. Tu copies.",
-            },
-            {
-              icon: Users,
-              title: "Stabilise",
-              desc: "Une seule action maintenant. Jamais plus de 3 par jour. Rooms collectives animées par l'IA.",
-            },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="glass rounded-2xl p-6 space-y-3">
+          {diffItems.map(({ icon: Icon, key }) => (
+            <div key={key} className="glass rounded-2xl p-6 space-y-3">
               <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Icon className="size-5 text-primary" strokeWidth={1.6} />
               </div>
-              <h3 className="font-heading text-xl">{title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              <h3 className="font-heading text-xl">{tLanding(`diff.${key}_title`)}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {tLanding(`diff.${key}_desc`)}
+              </p>
             </div>
           ))}
         </div>
@@ -161,9 +156,11 @@ export default function HomePage() {
       {/* PRICING TEASER */}
       <section className="container-calm py-20 md:py-28">
         <div className="text-center mb-14">
-          <h2 className="font-heading text-3xl md:text-4xl tracking-tight">Un tarif honnête.</h2>
+          <h2 className="font-heading text-3xl md:text-4xl tracking-tight">
+            {tLanding("pricingTeaser.title")}
+          </h2>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Commence gratuitement. Passe Pro quand tu sens la différence.
+            {tLanding("pricingTeaser.subtitle")}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -201,7 +198,7 @@ export default function HomePage() {
         <div className="text-center mt-8">
           <Button asChild variant="ghost">
             <Link href="/pricing">
-              Voir tout en détail
+              {tLanding("pricingTeaser.viewAll")}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -211,13 +208,15 @@ export default function HomePage() {
       {/* CTA FINAL */}
       <section className="container-calm py-20 md:py-28">
         <div className="glass rounded-3xl p-10 md:p-16 text-center space-y-6">
-          <h2 className="font-heading text-3xl md:text-5xl tracking-tight">Tu vas respirer.</h2>
+          <h2 className="font-heading text-3xl md:text-5xl tracking-tight">
+            {tLanding("ctaFinal.title")}
+          </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            C&apos;est tout. On commence par là. Le reste suit, naturellement.
+            {tLanding("ctaFinal.subtitle")}
           </p>
           <Button asChild size="lg" className="h-12 px-8">
             <Link href="/signup">
-              Créer mon espace
+              {tLanding("ctaFinal.button")}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -228,26 +227,27 @@ export default function HomePage() {
       {/* FOOTER */}
       <footer className="container-calm py-12 border-t border-border/40">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} PURAMA · 8 Rue de la Chapelle, 25560 Frasne</p>
-          <div className="flex flex-wrap gap-6">
+          <p>{tFooter("rights", { year: new Date().getFullYear() })}</p>
+          <div className="flex flex-wrap items-center gap-6">
             <Link href="/manifesto" className="hover:text-foreground transition-colors">
-              Manifesto
+              {tFooter("manifesto")}
             </Link>
             <Link href="/pricing" className="hover:text-foreground transition-colors">
-              Tarifs
+              {tFooter("pricing")}
             </Link>
             <Link href="/safety" className="hover:text-foreground transition-colors">
-              Sécurité
+              {tFooter("safety")}
             </Link>
             <Link href="/cgu" className="hover:text-foreground transition-colors">
-              CGU
+              {tFooter("cgu")}
             </Link>
             <Link href="/confidentialite" className="hover:text-foreground transition-colors">
-              Confidentialité
+              {tFooter("privacy")}
             </Link>
             <Link href="/mentions-legales" className="hover:text-foreground transition-colors">
-              Mentions légales
+              {tFooter("legal")}
             </Link>
+            <LangSwitcher align="end" />
           </div>
         </div>
       </footer>

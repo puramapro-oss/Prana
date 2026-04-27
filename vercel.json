@@ -3,6 +3,8 @@
   "crons": [
     { "path": "/api/cron/twin-weekly", "schedule": "0 4 * * 0" },
     { "path": "/api/cron/daily-score", "schedule": "0 3 * * *" },
-    { "path": "/api/cron/room-tick", "schedule": "0 7 * * *" }
+    { "path": "/api/cron/room-tick", "schedule": "0 7 * * *" },
+    { "path": "/api/cron/email-lifecycle", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/social-autopilot", "schedule": "0 10 * * 1,3,5" }
   ]
 }

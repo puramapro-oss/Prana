@@ -1,0 +1,101 @@
+{
+  "Common": {
+    "appName": "PURAMA ONE",
+    "tagline": "The human OS that calms you, organizes you, and executes for you",
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "continue": "Continue",
+    "back": "Back",
+    "noCard": "No credit card. Cancel anytime."
+  },
+  "Nav": {
+    "manifesto": "Manifesto",
+    "pricing": "Pricing",
+    "safety": "Safety",
+    "login": "Sign in",
+    "signup": "Get started",
+    "logout": "Sign out"
+  },
+  "Footer": {
+    "rights": "© {year} PURAMA · 8 Rue de la Chapelle, 25560 Frasne, France",
+    "manifesto": "Manifesto",
+    "pricing": "Pricing",
+    "safety": "Safety",
+    "cgu": "Terms",
+    "privacy": "Privacy",
+    "legal": "Legal notice",
+    "language": "Language"
+  },
+  "Landing": {
+    "badge": "The first human OS",
+    "h1Line1": "Instant calm.",
+    "h1Line2": "Total clarity.",
+    "h1Line3": "Automatic execution.",
+    "subtitle": "Regulate your nervous system in 20 seconds. Organize your life. Let AI execute for you. One system, in total synergy.",
+    "ctaPrimary": "Start — 7 days Pro free",
+    "ctaSecondary": "Read the manifesto",
+    "diff": {
+      "title": "Four things, in total synergy.",
+      "subtitle": "No one does all four together. PURAMA ONE does.",
+      "regulate_title": "Regulate",
+      "regulate_desc": "20 seconds to 3 minutes. Guided protocols to bring calm back, first.",
+      "organize_title": "Organize",
+      "organize_desc": "LifeOS: tasks, projects, people, notes. Voice capture, automatic sorting.",
+      "execute_title": "Execute",
+      "execute_desc": "The AI agent drafts your messages, emails, plans, docs. You approve. You copy.",
+      "stabilize_title": "Stabilize",
+      "stabilize_desc": "One single action now. Never more than 3 a day. Rooms hosted by AI."
+    },
+    "pricingTeaser": {
+      "title": "An honest price.",
+      "subtitle": "Start free. Go Pro when you feel the difference.",
+      "viewAll": "See all details"
+    },
+    "ctaFinal": {
+      "title": "You're going to breathe.",
+      "subtitle": "That's all. We start there. The rest follows, naturally.",
+      "button": "Create my space"
+    }
+  },
+  "Auth": {
+    "login": {
+      "title": "Welcome back.",
+      "subtitle": "Get a magic link by email or continue with Google.",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "magicLink": "Send magic link",
+      "google": "Continue with Google",
+      "noAccount": "No account yet?",
+      "signupLink": "Create an account",
+      "forgotPassword": "Forgot password?",
+      "checkInbox": "Link sent. Check your inbox."
+    },
+    "signup": {
+      "title": "Welcome.",
+      "subtitle": "7 days Pro free. No credit card.",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "magicLink": "Send magic link",
+      "google": "Sign up with Google",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "terms": "By creating an account, you accept our {cgu} and {privacy}.",
+      "checkInbox": "Link sent. Check your inbox."
+    },
+    "forgot": {
+      "title": "Reset password",
+      "subtitle": "Send me a link to sign back in.",
+      "email": "Email",
+      "send": "Send link",
+      "back": "Back to sign in"
+    }
+  },
+  "LangSwitcher": {
+    "label": "Change language",
+    "fr": "Français",
+    "en": "English"
+  }
+}

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google"
+import { NextIntlClientProvider } from "next-intl"
+import { getLocale, getMessages } from "next-intl/server"
 import "./globals.css"
 import { ThemeProvider } from "@/components/shared/theme-provider"
 import { QueryProvider } from "@/components/providers/query-provider"
@@ -8,6 +10,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PostHogProvider } from "@/components/analytics/posthog-provider"
 import { SentryInit } from "@/components/analytics/sentry-init"
+import { SwRegister } from "@/components/shared/sw-register"
 
 const inter = Inter({
   variable: "--font-sans",
@@ -37,6 +40,12 @@ export const metadata: Metadata = {
   description:
     "Régule ton système nerveux en 20 secondes, organise ta vie, et laisse l'IA exécuter pour toi. PURAMA ONE — un seul système pour la clarté totale.",
   applicationName: "PURAMA ONE",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "PURAMA",
+  },
   authors: [{ name: "PURAMA" }],
   keywords: [
     "régulation système nerveux",
@@ -87,10 +96,12 @@ export const viewport: Viewport = {
   maximumScale: 5,
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
   return (
     <html
-      lang="fr"
+      lang={locale}
       suppressHydrationWarning
       className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
     >
@@ -99,23 +110,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-2 focus:text-background focus:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          Aller au contenu
+          {locale === "en" ? "Skip to content" : "Aller au contenu"}
         </a>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            {children}
-            <Toaster position="top-center" richColors closeButton />
-          </QueryProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              {children}
+              <Toaster position="top-center" richColors closeButton />
+            </QueryProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />
         <PostHogProvider />
         <SentryInit />
+        <SwRegister />
       </body>
     </html>
   )

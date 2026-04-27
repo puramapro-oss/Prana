@@ -1,0 +1,101 @@
+{
+  "Common": {
+    "appName": "PURAMA ONE",
+    "tagline": "L'OS humain qui te calme, t'organise, et exécute pour toi",
+    "loading": "Chargement…",
+    "error": "Une erreur est survenue.",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "continue": "Continuer",
+    "back": "Retour",
+    "noCard": "Sans carte bancaire. Annule à tout moment."
+  },
+  "Nav": {
+    "manifesto": "Manifesto",
+    "pricing": "Tarifs",
+    "safety": "Sécurité",
+    "login": "Se connecter",
+    "signup": "Commencer",
+    "logout": "Se déconnecter"
+  },
+  "Footer": {
+    "rights": "© {year} PURAMA · 8 Rue de la Chapelle, 25560 Frasne",
+    "manifesto": "Manifesto",
+    "pricing": "Tarifs",
+    "safety": "Sécurité",
+    "cgu": "CGU",
+    "privacy": "Confidentialité",
+    "legal": "Mentions légales",
+    "language": "Langue"
+  },
+  "Landing": {
+    "badge": "Le premier OS humain",
+    "h1Line1": "Calme instantané.",
+    "h1Line2": "Clarté totale.",
+    "h1Line3": "Exécution automatique.",
+    "subtitle": "Régule ton système nerveux en 20 secondes. Organise ta vie. Laisse l'IA exécuter pour toi. Un seul système, en synergie totale.",
+    "ctaPrimary": "Commencer — 7 jours Pro offerts",
+    "ctaSecondary": "Lire le manifeste",
+    "diff": {
+      "title": "Quatre choses, en synergie totale.",
+      "subtitle": "Personne ne fait les quatre ensemble. PURAMA ONE, oui.",
+      "regulate_title": "Régule",
+      "regulate_desc": "20 secondes à 3 minutes. Protocoles guidés pour ramener le calme avant tout.",
+      "organize_title": "Organise",
+      "organize_desc": "LifeOS : tâches, projets, personnes, notes. Capture vocale, classement automatique.",
+      "execute_title": "Exécute",
+      "execute_desc": "L'agent IA rédige tes messages, mails, plans, docs. Tu approuves. Tu copies.",
+      "stabilize_title": "Stabilise",
+      "stabilize_desc": "Une seule action maintenant. Jamais plus de 3 par jour. Rooms collectives animées par l'IA."
+    },
+    "pricingTeaser": {
+      "title": "Un tarif honnête.",
+      "subtitle": "Commence gratuitement. Passe Pro quand tu sens la différence.",
+      "viewAll": "Voir tout en détail"
+    },
+    "ctaFinal": {
+      "title": "Tu vas respirer.",
+      "subtitle": "C'est tout. On commence par là. Le reste suit, naturellement.",
+      "button": "Créer mon espace"
+    }
+  },
+  "Auth": {
+    "login": {
+      "title": "Bon retour.",
+      "subtitle": "Reçois un lien magique par email ou continue avec Google.",
+      "email": "Email",
+      "emailPlaceholder": "toi@exemple.com",
+      "magicLink": "Recevoir un lien magique",
+      "google": "Continuer avec Google",
+      "noAccount": "Pas encore de compte ?",
+      "signupLink": "Créer un compte",
+      "forgotPassword": "Mot de passe oublié ?",
+      "checkInbox": "Lien envoyé. Regarde ta boîte mail."
+    },
+    "signup": {
+      "title": "Bienvenue.",
+      "subtitle": "7 jours Pro offerts. Sans carte bancaire.",
+      "email": "Email",
+      "emailPlaceholder": "toi@exemple.com",
+      "magicLink": "Recevoir un lien magique",
+      "google": "S'inscrire avec Google",
+      "haveAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter",
+      "terms": "En créant un compte, tu acceptes nos {cgu} et notre {privacy}.",
+      "checkInbox": "Lien envoyé. Regarde ta boîte mail."
+    },
+    "forgot": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Envoie-moi un lien pour me reconnecter.",
+      "email": "Email",
+      "send": "Envoyer le lien",
+      "back": "Retour à la connexion"
+    }
+  },
+  "LangSwitcher": {
+    "label": "Changer la langue",
+    "fr": "Français",
+    "en": "English"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "PURAMA ONE — PRANA",
+  "short_name": "PURAMA",
+  "description": "Régule. Organise. Exécute. L'OS humain pour la clarté totale.",
+  "start_url": "/today",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0A0F",
+  "theme_color": "#0A0A0F",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["health", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Aujourd'hui",
+      "short_name": "Today",
+      "url": "/today",
+      "description": "Ton point du jour"
+    },
+    {
+      "name": "Réguler",
+      "short_name": "Regulate",
+      "url": "/regulate",
+      "description": "Calmer le système nerveux"
+    },
+    {
+      "name": "Capture",
+      "short_name": "Capture",
+      "url": "/lifeos?capture=1",
+      "description": "Capture vocale rapide"
+    },
+    {
+      "name": "SOS",
+      "short_name": "SOS",
+      "url": "/sos",
+      "description": "Aide d'urgence"
+    }
+  ]
+}
