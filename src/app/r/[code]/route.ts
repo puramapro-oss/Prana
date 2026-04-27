@@ -1,10 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server"
+import { type NextRequest } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 
-export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
 const COOKIE_NAME = "prana_ref"
-const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 // 30 days, in seconds
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 // 30 days, seconds
 
 /**
  * Public referral entry point.
@@ -15,52 +15,49 @@ const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 // 30 days, in seconds
  *
  * The cookie is consumed by /auth/callback, which validates the referrer
  * profile exists before inserting a `referrals` row. A bogus code never
- * creates a row, so we don't pre-validate here (saves a DB roundtrip on
- * every link click).
+ * creates a row, so we don't pre-validate here.
  *
- * Anonymous-friendly. Never 404s.
+ * Implementation note : we use the Web standard `Response` (not
+ * `NextResponse.redirect()`) because the latter applies its own cache
+ * headers and, on Vercel, the Set-Cookie can be dropped at the edge for
+ * cached redirect responses. Manual response = full header control.
  */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ code: string }> }) {
   const { code } = await ctx.params
   const safeCode = (code ?? "").slice(0, 16)
 
   const origin = new URL(req.url).origin
-  const signupUrl = new URL("/signup", origin)
 
   if (!safeCode || safeCode.length < 4) {
-    return NextResponse.redirect(signupUrl)
+    return new Response(null, {
+      status: 307,
+      headers: {
+        Location: `${origin}/signup`,
+        "Cache-Control": "no-store",
+      },
+    })
   }
 
-  signupUrl.searchParams.set("ref", safeCode)
+  // Best-effort lookup for telemetry (logs only — never gates the cookie).
+  try {
+    const admin = createAdminClient()
+    await admin
+      .from("profiles")
+      .select("id")
+      .eq("referral_code", safeCode)
+      .maybeSingle()
+  } catch {
+    // ignore — cookie set regardless
+  }
 
-  // Resolve referral_code → only set cookie when the profile actually exists.
-  const admin = createAdminClient()
-  const profileResp = await admin
-    .from("profiles")
-    .select("id")
-    .eq("referral_code", safeCode)
-    .maybeSingle()
-  const found = !!profileResp.data
+  const cookieValue = `${COOKIE_NAME}=${encodeURIComponent(safeCode)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${COOKIE_MAX_AGE}`
 
-  // Build a manual 307 response so we keep full control over Set-Cookie and
-  // cache-control. NextResponse.redirect() applies its own cache headers and,
-  // on Vercel, can have its Set-Cookie dropped at the edge.
-  const response = new NextResponse(null, {
+  return new Response(null, {
     status: 307,
     headers: {
-      location: signupUrl.toString(),
-      "cache-control": "no-store",
+      Location: `${origin}/signup?ref=${encodeURIComponent(safeCode)}`,
+      "Cache-Control": "no-store",
+      "Set-Cookie": cookieValue,
     },
   })
-  response.cookies.set({
-    name: COOKIE_NAME,
-    value: safeCode,
-    httpOnly: true,
-    sameSite: "lax",
-    secure: true,
-    maxAge: COOKIE_MAX_AGE,
-    path: "/",
-  })
-  void found
-  return response
 }
