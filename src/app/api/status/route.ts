@@ -22,24 +22,32 @@ async function checkSupabase(): Promise<CheckResult> {
   }
 }
 
-// Probe GoTrue via Kong. The original supabase check only hits PostgREST,
-// so a broken Kong→auth route (e.g. "name resolution failed") slips past
-// while signup/login is dead for users.
+// Probe GoTrue via Kong AND verify it can talk to its DB. /settings is static
+// so it only proves "Kong→auth reachable". /admin/users?per_page=1 hits the
+// auth.users table — catches the case where gotrue is up but its connection
+// pool to Postgres is dead (we hit this on 2026-04-27).
 async function checkAuth(): Promise<CheckResult> {
   const t0 = Date.now()
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    if (!url || !key) return { ok: false, error: "supabase env missing" }
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !serviceKey) return { ok: false, error: "supabase env missing" }
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), 5_000)
-    const res = await fetch(`${url}/auth/v1/settings`, {
-      headers: { apikey: key },
+    const res = await fetch(`${url}/auth/v1/admin/users?per_page=1`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
       signal: ctrl.signal,
       cache: "no-store",
     })
     clearTimeout(timer)
-    if (!res.ok) return { ok: false, error: `HTTP ${res.status}`, latency_ms: Date.now() - t0 }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "")
+      return {
+        ok: false,
+        error: `HTTP ${res.status}${text ? `: ${text.slice(0, 120)}` : ""}`,
+        latency_ms: Date.now() - t0,
+      }
+    }
     return { ok: true, latency_ms: Date.now() - t0 }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "unknown" }

@@ -26,22 +26,40 @@ export function adminClient(): SupabaseClient {
 }
 
 /**
- * Probe whether GoTrue is reachable. Some test paths bootstrap users via the
- * admin API; if Kong→auth is broken (returns 503 "name resolution failed")
- * we skip the auth-dependent tests rather than fail with confusing errors.
+ * Probe whether GoTrue is reachable AND can talk to its DB. The /settings
+ * endpoint is static config and only proves "Kong→auth route works" — it
+ * stays green even when gotrue's connection pool to Postgres is dead. We
+ * also hit /admin/users?per_page=1 (read path against auth.users) so that
+ * E2E tests skip cleanly when a write to auth.users would fail with the
+ * same "Database error creating new user" we saw in prod on 2026-04-27.
  */
 export async function isAuthReachable(): Promise<boolean> {
-  if (!SUPABASE_ANON_KEY) return false
+  if (!SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) return false
   try {
     const ctrl = new AbortController()
     const t = setTimeout(() => ctrl.abort(), 5_000)
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+    const settingsRes = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
       headers: { apikey: SUPABASE_ANON_KEY },
       signal: ctrl.signal,
       cache: "no-store",
     })
+    if (!settingsRes.ok) {
+      clearTimeout(t)
+      return false
+    }
+    const adminRes = await fetch(
+      `${SUPABASE_URL}/auth/v1/admin/users?per_page=1`,
+      {
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        signal: ctrl.signal,
+        cache: "no-store",
+      },
+    )
     clearTimeout(t)
-    return res.ok
+    return adminRes.ok
   } catch {
     return false
   }
