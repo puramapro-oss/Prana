@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import type { MagicButtonConfig } from "@/lib/agent/magic-buttons-config"
 import type { MagicButtonResponse } from "@/lib/agent/prompts/magic-buttons"
+import { track } from "@/lib/analytics"
 
 interface MagicButtonModalProps {
   button: MagicButtonConfig
@@ -73,6 +74,7 @@ export function MagicButtonModal({ button, locked, open, onOpenChange }: MagicBu
   async function handleStart() {
     setPhase("loading")
     setErrorMsg(null)
+    track("magic_button_clicked", { slug: button.slug })
     try {
       const r = await fetch("/api/agent/magic-button", {
         method: "POST",
@@ -101,6 +103,7 @@ export function MagicButtonModal({ button, locked, open, onOpenChange }: MagicBu
       }
       setResult(ok.response)
       setPhase("result")
+      track("magic_button_used", { slug: button.slug, fallback: ok.fallback_used })
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erreur"
       setErrorMsg(msg)

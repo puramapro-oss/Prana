@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe/client"
 import { PLANS, TRIAL_DAYS } from "@/lib/stripe/plans"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { apiLimiter } from "@/lib/upstash"
 
 const Body = z.object({
   planId: z.enum(["starter", "pro", "ultime"]),
@@ -18,6 +19,14 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: "Connecte-toi pour passer à l'abonnement." }, { status: 401 })
+    }
+
+    const limit = await apiLimiter.limit(`checkout:${user.id}`)
+    if (!limit.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Patiente quelques secondes." },
+        { status: 429 },
+      )
     }
 
     const json = await req.json()

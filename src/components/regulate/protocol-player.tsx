@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { BreathingCircle } from "./breathing-circle"
 import { PulseCheckSlider } from "@/components/pulse/pulse-check-slider"
 import { cn } from "@/lib/utils"
+import { track } from "@/lib/analytics"
 import type { ProtocolDefinition, ProtocolStep } from "@/lib/regulate/protocols"
 
 type Stage = "before" | "running" | "after" | "done"
@@ -75,6 +76,7 @@ export function ProtocolPlayer({ protocol }: ProtocolPlayerProps) {
       setSessionId((j as StartResp).session_id)
       setStage("running")
       setStepIndex(0)
+      track("protocol_started", { slug: protocol.slug })
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erreur")
     }
@@ -102,6 +104,7 @@ export function ProtocolPlayer({ protocol }: ProtocolPlayerProps) {
       if (!r.ok || "error" in j) throw new Error(("error" in j && j.error) || "Erreur")
       toast.success("Bien joué.")
       setStage("done")
+      track("protocol_completed", { slug: protocol.slug, duration_s: elapsed })
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erreur")
     } finally {

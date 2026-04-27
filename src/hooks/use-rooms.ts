@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { RoomMessage } from "@/lib/supabase/types"
+import { track } from "@/lib/analytics"
 
 interface JoinResponse {
   ok: true
@@ -26,6 +27,7 @@ export function useJoinRoom() {
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ["room", variables.slug] })
       qc.invalidateQueries({ queryKey: ["rooms"] })
+      track("room_joined", { slug: variables.slug })
     },
   })
 }

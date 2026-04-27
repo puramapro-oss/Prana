@@ -6,7 +6,20 @@ import { formatPrice } from "@/lib/utils"
 
 export const metadata = {
   title: "Tarifs",
-  description: "Un tarif honnête. 7 jours Pro offerts à l'inscription, sans carte.",
+  description:
+    "Un tarif honnête. 7 jours Pro offerts à l'inscription, sans carte. Annulation en 1 clic, à tout moment.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "Tarifs · PURAMA ONE",
+    description: "7 jours Pro offerts. Sans carte.",
+    images: [
+      {
+        url: "/api/og?title=Tarifs&subtitle=7 jours Pro offerts. Sans carte.",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
 }
 
 export default function PricingPage() {

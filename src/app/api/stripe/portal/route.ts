@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { stripe } from "@/lib/stripe/client"
 import { createClient } from "@/lib/supabase/server"
+import { apiLimiter } from "@/lib/upstash"
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +11,14 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: "Connecte-toi d'abord." }, { status: 401 })
+    }
+
+    const limit = await apiLimiter.limit(`portal:${user.id}`)
+    if (!limit.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Patiente quelques secondes." },
+        { status: 429 },
+      )
     }
 
     const { data: profileRaw } = await supabase

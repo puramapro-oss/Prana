@@ -1,20 +1,32 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { useScore, useReportSleep } from "@/hooks/use-score"
-import {
-  StressEnergyChart,
-  SleepChart,
-  FocusChart,
-  AvancementChart,
-} from "@/components/score/score-chart"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const StressEnergyChart = dynamic(
+  () => import("@/components/score/score-chart").then((m) => m.StressEnergyChart),
+  { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> },
+)
+const SleepChart = dynamic(
+  () => import("@/components/score/score-chart").then((m) => m.SleepChart),
+  { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> },
+)
+const FocusChart = dynamic(
+  () => import("@/components/score/score-chart").then((m) => m.FocusChart),
+  { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> },
+)
+const AvancementChart = dynamic(
+  () => import("@/components/score/score-chart").then((m) => m.AvancementChart),
+  { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> },
+)
 import { StreakBadge } from "@/components/score/streak-badge"
 import { BadgesRow } from "@/components/score/badges-row"
 import { PointsCard } from "@/components/score/points-card"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { Moon } from "lucide-react"
 

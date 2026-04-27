@@ -4,7 +4,20 @@ import { Button } from "@/components/ui/button"
 
 export const metadata = {
   title: "Manifeste",
-  description: "Pourquoi PURAMA ONE existe. Et pour qui.",
+  description:
+    "Pourquoi PURAMA ONE existe. Un seul système qui calme, organise, et exécute pour toi — sans surcharge cognitive ni gamification anxiogène.",
+  alternates: { canonical: "/manifesto" },
+  openGraph: {
+    title: "Manifeste · PURAMA ONE",
+    description: "Pourquoi PURAMA ONE existe. Et pour qui.",
+    images: [
+      {
+        url: "/api/og?title=Manifeste&subtitle=Pourquoi PURAMA ONE existe",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
 }
 
 export default function ManifestoPage() {

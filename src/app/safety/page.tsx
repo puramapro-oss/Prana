@@ -6,7 +6,19 @@ import { HOTLINES } from "@/lib/safety/hotlines"
 export const metadata = {
   title: "Sécurité & soin",
   description:
-    "PURAMA ONE n'est pas un soignant. Si c'est dur, on t'oriente vers un pro. Et on ne te juge pas.",
+    "PURAMA ONE n'est pas un soignant. Si c'est dur, on t'oriente vers un pro. Numéros d'urgence FR/EN/INT, ressources, et règles claires.",
+  alternates: { canonical: "/safety" },
+  openGraph: {
+    title: "Sécurité & soin · PURAMA ONE",
+    description: "On n'est pas un soignant. Si c'est dur, on t'oriente vers un pro.",
+    images: [
+      {
+        url: "/api/og?title=Sécurité %26 soin&subtitle=Si c%27est dur, on t%27oriente vers un pro",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
 }
 
 export default function SafetyPage() {

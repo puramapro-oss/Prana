@@ -6,6 +6,8 @@ import { QueryProvider } from "@/components/providers/query-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { PostHogProvider } from "@/components/analytics/posthog-provider"
+import { SentryInit } from "@/components/analytics/sentry-init"
 
 const inter = Inter({
   variable: "--font-sans",
@@ -54,11 +56,20 @@ export const metadata: Metadata = {
     title: "PURAMA ONE — L'OS humain",
     description:
       "Régule, organise, exécute. Un seul système pour la clarté totale.",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "PURAMA ONE",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "PURAMA ONE",
     description: "Régule, organise, exécute.",
+    images: ["/api/og"],
   },
   robots: {
     index: true,
@@ -84,6 +95,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-sans antialiased">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-2 focus:text-background focus:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          Aller au contenu
+        </a>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -97,6 +114,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
+        <PostHogProvider />
+        <SentryInit />
       </body>
     </html>
   )

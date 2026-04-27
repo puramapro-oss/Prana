@@ -1,12 +1,57 @@
 import Link from "next/link"
+import Script from "next/script"
 import { ArrowRight, Wind, Sparkles, Brain, ListChecks, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PLANS } from "@/lib/stripe/plans"
 import { formatPrice } from "@/lib/utils"
 
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://prana.purama.dev"
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${BASE}/#organization`,
+      name: "PURAMA",
+      url: BASE,
+      logo: `${BASE}/icon.png`,
+      sameAs: ["https://github.com/puramapro-oss"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${BASE}/#website`,
+      url: BASE,
+      name: "PURAMA ONE",
+      description:
+        "L'OS humain qui te calme, t'organise, et exécute pour toi. Régule ton système nerveux en 20 secondes.",
+      publisher: { "@id": `${BASE}/#organization` },
+      inLanguage: "fr-FR",
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "PURAMA ONE",
+      applicationCategory: "HealthApplication",
+      operatingSystem: "Web",
+      offers: {
+        "@type": "Offer",
+        price: "9.99",
+        priceCurrency: "EUR",
+      },
+      aggregateRating: undefined,
+    },
+  ],
+}
+
 export default function HomePage() {
   return (
     <div className="min-h-svh">
+      <Script
+        id="ld-home"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* HEADER */}
       <header className="container-calm flex items-center justify-between h-16">
         <Link href="/" className="flex items-center gap-2">
@@ -37,6 +82,7 @@ export default function HomePage() {
         </div>
       </header>
 
+      <main id="main">
       {/* HERO */}
       <section className="container-calm pt-16 pb-20 md:pt-28 md:pb-32 text-center">
         <div className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-6">
@@ -177,6 +223,7 @@ export default function HomePage() {
           </Button>
         </div>
       </section>
+      </main>
 
       {/* FOOTER */}
       <footer className="container-calm py-12 border-t border-border/40">
