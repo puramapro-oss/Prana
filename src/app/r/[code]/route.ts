@@ -10,14 +10,15 @@ const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 // 30 days, in seconds
  * Public referral entry point.
  *
  * GET /r/<code> :
- *  1. Always redirect to /signup?ref=<code> (helps the signup page show a "Bienvenue, untel·le t'invite").
- *  2. Set httpOnly cookie `prana_ref=<code>` for 30d ONLY if the code resolves to a real profile.
+ *  1. Redirect to /signup?ref=<code>.
+ *  2. Set httpOnly cookie `prana_ref=<code>` for 30d.
  *
- * The cookie is the canonical source consumed by /auth/callback. The callback
- * itself validates the referrer profile exists before inserting a `referrals`
- * row, so passing a bogus code through the query string is harmless.
+ * The cookie is consumed by /auth/callback, which validates the referrer
+ * profile exists before inserting a `referrals` row. A bogus code never
+ * creates a row, so we don't pre-validate here (saves a DB roundtrip on
+ * every link click).
  *
- * Anonymous-friendly. Never 404s — protects creator anonymity (no probing).
+ * Anonymous-friendly. Never 404s.
  */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ code: string }> }) {
   const { code } = await ctx.params
@@ -41,26 +42,23 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
     .maybeSingle()
   const found = !!profileResp.data
 
-  // Diagnostic header (not exposed in user UX). Helpful in Vercel logs/curl-I.
-  // Strips to a stable shape: ok|empty|err.
-  const debugStatus = profileResp.error
-    ? `err:${profileResp.error.code ?? "x"}`
-    : found
-      ? "ok"
-      : "empty"
-
   const response = NextResponse.redirect(signupUrl)
-  response.headers.set("x-prana-ref", debugStatus)
-  if (found) {
-    response.cookies.set({
-      name: COOKIE_NAME,
-      value: safeCode,
-      httpOnly: true,
-      sameSite: "lax",
-      secure: true,
-      maxAge: COOKIE_MAX_AGE,
-      path: "/",
-    })
-  }
+  // Always set the cookie. The /auth/callback route validates the referrer
+  // profile before inserting a referrals row, so a bogus code is harmless.
+  // We previously gated the cookie on `found`, but that adds a DB roundtrip
+  // for every /r/* hit on the same redirect path — overkill and brittle.
+  response.cookies.set({
+    name: COOKIE_NAME,
+    value: safeCode,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true,
+    maxAge: COOKIE_MAX_AGE,
+    path: "/",
+  })
+  // `found` retained as a hint surfaced in logs; the variable is intentionally
+  // unused in the response so the rule "validate at callback time" stays the
+  // single source of truth.
+  void found
   return response
 }
