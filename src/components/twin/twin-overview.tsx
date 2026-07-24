@@ -3,7 +3,6 @@
 import { useState } from "react"
 import {
   Loader2,
-  RefreshCw,
   Brain,
   Lock,
   Sparkles,

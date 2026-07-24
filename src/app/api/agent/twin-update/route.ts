@@ -14,10 +14,6 @@ import {
 import type {
   Plan,
   Profile,
-  PulseCheck,
-  Capture,
-  Task,
-  Execution,
   TwinProfile,
 } from "@/lib/supabase/types"
 

@@ -19,6 +19,8 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       "mobile/**",
+      ".vercel/**",
+      "public/sw.js",
     ],
   },
 ];
