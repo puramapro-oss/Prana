@@ -170,10 +170,12 @@
   html {
     @apply font-sans antialiased;
     font-feature-settings: "ss01", "cv11";
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
     /* Background multicouche apaisant — couche 2 radial subtle teal/sky, couche 3 grille douce */
     background-image:
       radial-gradient(ellipse 80% 50% at 50% 0%, oklch(0.72 0.13 192 / 6%), transparent),

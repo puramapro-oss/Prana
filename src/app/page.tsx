@@ -59,7 +59,7 @@ export default async function HomePage() {
   ] as const
 
   return (
-    <div className="min-h-svh">
+    <div className="min-h-svh overflow-x-hidden">
       <Script
         id="ld-home"
         type="application/ld+json"
@@ -67,7 +67,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* HEADER */}
-      <header className="container-calm flex items-center justify-between h-16">
+      <header className="container-calm flex items-center justify-between h-16 gap-2">
         <Link href="/" className="flex items-center gap-2">
           <Wind className="size-5 text-primary" strokeWidth={1.6} />
           <span className="font-heading text-lg tracking-tight">PURAMA ONE</span>
@@ -83,9 +83,9 @@ export default async function HomePage() {
             {tNav("safety")}
           </Link>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <LangSwitcher />
-          <Button asChild variant="ghost" size="sm">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
             <Link href="/login">{tNav("login")}</Link>
           </Button>
           <Button asChild size="sm">
@@ -138,9 +138,9 @@ export default async function HomePage() {
             {tLanding("diff.subtitle")}
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {diffItems.map(({ icon: Icon, key }) => (
-            <div key={key} className="glass rounded-2xl p-6 space-y-3">
+            <div key={key} className="glass rounded-2xl p-6 space-y-3 min-w-0">
               <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Icon className="size-5 text-primary" strokeWidth={1.6} />
               </div>
@@ -163,11 +163,11 @@ export default async function HomePage() {
             {tLanding("pricingTeaser.subtitle")}
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`glass rounded-2xl p-6 space-y-4 ${
+              className={`glass rounded-2xl p-6 space-y-4 min-w-0 ${
                 plan.highlighted ? "ring-1 ring-primary/40 shadow-xl shadow-primary/10" : ""
               }`}
             >
@@ -227,8 +227,8 @@ export default async function HomePage() {
       {/* FOOTER */}
       <footer className="container-calm py-12 border-t border-border/40">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center text-sm text-muted-foreground">
-          <p>{tFooter("rights", { year: new Date().getFullYear() })}</p>
-          <div className="flex flex-wrap items-center gap-6">
+          <p className="text-center md:text-left">{tFooter("rights", { year: new Date().getFullYear() })}</p>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <Link href="/manifesto" className="hover:text-foreground transition-colors">
               {tFooter("manifesto")}
             </Link>
