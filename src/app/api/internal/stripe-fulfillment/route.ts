@@ -20,9 +20,15 @@ function planFromPriceId(priceId: string | undefined | null): "starter" | "pro" 
 }
 
 export async function POST(req: NextRequest) {
-  const sig = req.headers.get("stripe-signature")
-  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  // Verify internal secret from karma dispatcher
+  const internalSecret = req.headers.get("x-internal-secret")
+  if (internalSecret !== process.env.INTERNAL_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+  }
 
+  // Defense in depth: verify Stripe signature
+  const sig = req.headers.get("x-stripe-signature")
+  const secret = process.env.STRIPE_WEBHOOK_SECRET
   if (!sig || !secret) {
     return NextResponse.json({ error: "missing signature" }, { status: 400 })
   }
