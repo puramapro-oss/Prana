@@ -18,6 +18,17 @@ function isProtectedPath(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Pages publiques (landing, pricing, manifeste...) n'ont besoin d'aucune
+  // vérification auth → évite un aller-retour réseau vers auth.purama.dev
+  // sur chaque chargement (root cause du délai perf constaté au Lighthouse).
+  const needsAuthCheck =
+    isProtectedPath(pathname) || pathname === "/login" || pathname === "/signup"
+  if (!needsAuthCheck) {
+    return NextResponse.next({ request: { headers: request.headers } })
+  }
+
   let response = NextResponse.next({ request: { headers: request.headers } })
 
   const supabase = createServerClient(
@@ -43,8 +54,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const { pathname } = request.nextUrl
 
   // Already authed → redirect away from /login and /signup
   if (user && (pathname === "/login" || pathname === "/signup")) {
