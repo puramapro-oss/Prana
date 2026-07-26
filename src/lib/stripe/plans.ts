@@ -36,8 +36,8 @@ export const PLANS: PlanDef[] = [
     id: "starter",
     name: "Starter",
     tagline: "Pour celles et ceux qui veulent du calme.",
-    priceMonthly: 29.99,
-    priceYearly: 287.9, // 29.99 × 12 × 0.80
+    priceMonthly: 9.99,
+    priceYearly: 95.90, // pricing unifié PURAMA -20%
     ctaLabel: "Démarrer 7 jours Pro offerts",
     stripePriceMonthlyId: process.env.STRIPE_PRICE_STARTER_MONTHLY,
     stripePriceYearlyId: process.env.STRIPE_PRICE_STARTER_YEARLY,
@@ -53,8 +53,8 @@ export const PLANS: PlanDef[] = [
     id: "pro",
     name: "Pro",
     tagline: "L'OS humain complet.",
-    priceMonthly: 69,
-    priceYearly: 662.4, // 69 × 12 × 0.80
+    priceMonthly: 49.99,
+    priceYearly: 479.90, // pricing unifié PURAMA -20%
     highlighted: true,
     ctaLabel: "Passer Pro",
     stripePriceMonthlyId: process.env.STRIPE_PRICE_PRO_MONTHLY,
