@@ -11,6 +11,11 @@ export function SwRegister() {
     if (process.env.NODE_ENV !== "production") return
 
     let cancelled = false
+    // 1ère visite : aucun SW ne contrôle encore la page → le controllerchange
+    // qui suivra l'activation initiale ne doit PAS recharger (sinon reload
+    // systématique au 1er chargement de chaque nouveau visiteur, root cause
+    // du "redirect" fantôme mesuré par Lighthouse sur /).
+    const hadController = Boolean(navigator.serviceWorker.controller)
 
     const onLoad = async () => {
       try {
@@ -43,7 +48,7 @@ export function SwRegister() {
 
     let reloaded = false
     const onControllerChange = () => {
-      if (reloaded) return
+      if (reloaded || !hadController) return
       reloaded = true
       window.location.reload()
     }
