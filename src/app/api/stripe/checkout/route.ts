@@ -9,6 +9,7 @@ import { apiLimiter } from "@/lib/upstash"
 const Body = z.object({
   planId: z.enum(["starter", "pro", "ultime"]),
   cycle: z.enum(["monthly", "yearly"]),
+  idempotencyKey: z.string().uuid().optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Données invalides." }, { status: 400 })
     }
-    const { planId, cycle } = parsed.data
+    const { planId, cycle, idempotencyKey } = parsed.data
 
     const plan = PLANS.find((p) => p.id === planId)
     const priceId = cycle === "monthly" ? plan?.stripePriceMonthlyId : plan?.stripePriceYearlyId
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
       const customer = await stripe.customers.create({
         email: user.email ?? profile?.email ?? undefined,
         metadata: { user_id: user.id, app: "prana" },
-      })
+      }, { idempotencyKey: `prana-customer-${user.id}` })
       customerId = customer.id
       await admin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id)
     }
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${origin}/pricing?canceled=1`,
       allow_promotion_codes: true,
       billing_address_collection: "auto",
-    })
+    }, { idempotencyKey: idempotencyKey ?? crypto.randomUUID() })
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
