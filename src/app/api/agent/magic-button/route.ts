@@ -149,6 +149,7 @@ export async function POST(req: NextRequest) {
         tier: "default",
         maxTokens: 768,
         temperature: 0.6,
+        userId: user.id,
       })
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("magic_button_timeout")), RESPONSE_TIMEOUT_MS),

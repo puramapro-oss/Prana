@@ -65,35 +65,35 @@ async function main() {
   const domains = list?.data ?? []
   const target = domains.find((d) => d.name === domain)
   if (!target) {
-    console.log(`No Resend domain "${domain}" found.`)
-    console.log("Create it via dashboard or POST /domains, then re-run this script.")
+    console.error(`No Resend domain "${domain}" found.`)
+    console.error("Create it via dashboard or POST /domains, then re-run this script.")
     process.exit(3)
   }
 
-  console.log(`Resend domain: ${target.name}`)
-  console.log(`  id:     ${target.id}`)
-  console.log(`  status: ${target.status}`)
-  console.log(`  region: ${target.region ?? "n/a"}`)
+  console.error(`Resend domain: ${target.name}`)
+  console.error(`  id:     ${target.id}`)
+  console.error(`  status: ${target.status}`)
+  console.error(`  region: ${target.region ?? "n/a"}`)
   if (Array.isArray(target.records)) {
-    console.log("  records:")
-    target.records.forEach((r) => console.log(fmtRecord(r)))
+    console.error("  records:")
+    target.records.forEach((r) => console.error(fmtRecord(r)))
   }
 
   if (reverify) {
-    console.log(`\nTriggering re-verify…`)
+    console.error(`\nTriggering re-verify…`)
     await api(`/domains/${target.id}/verify`, { method: "POST" })
-    console.log("Re-verify queued. Resend will recheck DNS in ~30 seconds.")
+    console.error("Re-verify queued. Resend will recheck DNS in ~30 seconds.")
   }
 
   if (target.status === "verified") {
-    console.log("\n✓ Domain ready — emails will send from this domain.")
+    console.error("\n✓ Domain ready — emails will send from this domain.")
     process.exit(0)
   }
   if (target.status === "pending") {
-    console.log("\n… Domain pending — DNS may still be propagating. Run with --reverify in 5 min.")
+    console.error("\n… Domain pending — DNS may still be propagating. Run with --reverify in 5 min.")
     process.exit(2)
   }
-  console.log("\n✗ Domain failed — check the unverified records above and update DNS.")
+  console.error("\n✗ Domain failed — check the unverified records above and update DNS.")
   process.exit(3)
 }
 

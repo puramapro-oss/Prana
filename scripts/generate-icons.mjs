@@ -122,7 +122,7 @@ async function main() {
   const wantMobile = args.has("--mobile") || (!args.has("--web") && !args.has("--mobile"))
   const list = TARGETS.filter((t) => (t.kind === "web" ? wantWeb : wantMobile))
 
-  console.log(`PRANA icon generator — seed=${SEED} — ${list.length} targets\n`)
+  console.error(`PRANA icon generator — seed=${SEED} — ${list.length} targets\n`)
 
   let okCount = 0
   // Sequential + spacing: Pollinations rate-limits hard.
@@ -130,7 +130,7 @@ async function main() {
     // Skip if already exists and --skip-existing flag.
     const out = resolve(ROOT, target.file)
     if (args.has("--skip-existing") && existsSync(out)) {
-      console.log(`→ ${target.file}: already exists, skipped`)
+      console.error(`→ ${target.file}: already exists, skipped`)
       okCount += 1
       continue
     }
@@ -139,9 +139,9 @@ async function main() {
     // Cool-down between targets: avoids 429 burst.
     await new Promise((r) => setTimeout(r, 2500))
   }
-  console.log(`\nDone — ${okCount}/${list.length} downloaded.`)
+  console.error(`\nDone — ${okCount}/${list.length} downloaded.`)
   if (okCount < list.length) {
-    console.log("Re-run later for the failures (existing files were preserved).")
+    console.error("Re-run later for the failures (existing files were preserved).")
   }
 }
 

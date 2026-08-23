@@ -5,7 +5,7 @@
  *   welcome (J0), day1_tip, day3_nudge, day7_tips, day14_upgrade, day21_testimonial, day30_winback
  *
  * 3 event templates (inline-triggered):
- *   referral_converted, room_day1, protocol_streak
+ *   referral_converted, room_day1, protocol_streak (delegated to templates-events.ts)
  *
  * Bilingual : FR (default) + EN, picked from profile.locale or fallback.
  *
@@ -13,6 +13,7 @@
  */
 
 import type { Locale } from "@/i18n/config"
+import { renderReferralConverted, renderRoomDay1, renderProtocolStreak } from "./templates-events"
 
 export type EmailTemplate =
   | "welcome"
@@ -274,70 +275,13 @@ ${btn("Ouvrir mon espace", `${url}/today`)}
       }
     }
 
-    case "referral_converted": {
-      const refereeName = String(ctx.extras?.referee ?? "")
-      if (locale === "en") {
-        const body = `<h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 16px;">Someone joined thanks to you.</h1>
-<p>${refereeName ? esc(refereeName) + " just signed up" : "A friend just signed up"} via your link. <strong>+500 points</strong> to your wallet, +30 days Pro for them.</p>
-${btn("View my referrals", `${url}/settings/referral`)}`
-        return {
-          subject: "+500 points — a referral converted",
-          html: shell({ locale, preheader: "Someone joined via your link.", bodyHtml: body }),
-          text: `Someone joined via your link. +500 points. ${url}/settings/referral`,
-        }
-      }
-      const body = `<h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 16px;">Quelqu'un t'a rejoint.</h1>
-<p>${refereeName ? esc(refereeName) + " vient de s'inscrire" : "Un·e ami·e vient de s'inscrire"} via ton lien. <strong>+500 points</strong> sur ton wallet, +30 jours Pro pour iel.</p>
-${btn("Voir mes parrainages", `${url}/settings/referral`)}`
-      return {
-        subject: "+500 points — un parrainage converti",
-        html: shell({ locale, preheader: "Quelqu'un t'a rejoint via ton lien.", bodyHtml: body }),
-        text: `Quelqu'un t'a rejoint. +500 points. ${url}/settings/referral`,
-      }
-    }
+    case "referral_converted":
+      return renderReferralConverted(locale, ctx)
 
-    case "room_day1": {
-      const roomName = String(ctx.extras?.roomName ?? (locale === "en" ? "your room" : "ta room"))
-      if (locale === "en") {
-        const body = `<h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 16px;">Day 1 — ${esc(roomName)}.</h1>
-<p>Today's micro-action is waiting. 5 minutes max. Don't think — open it.</p>
-${btn("Open the room", `${url}/rooms`)}`
-        return {
-          subject: `Day 1 — ${roomName}`,
-          html: shell({ locale, preheader: "Today's micro-action is ready.", bodyHtml: body }),
-          text: `Day 1 micro-action: ${url}/rooms`,
-        }
-      }
-      const body = `<h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 16px;">Jour 1 — ${esc(roomName)}.</h1>
-<p>Ta micro-action du jour t'attend. 5 minutes max. Ne réfléchis pas — ouvre.</p>
-${btn("Ouvrir la room", `${url}/rooms`)}`
-      return {
-        subject: `Jour 1 — ${roomName}`,
-        html: shell({ locale, preheader: "Ta micro-action du jour est prête.", bodyHtml: body }),
-        text: `Jour 1 micro-action : ${url}/rooms`,
-      }
-    }
+    case "room_day1":
+      return renderRoomDay1(locale, ctx)
 
-    case "protocol_streak": {
-      const days = Number(ctx.extras?.days ?? 7)
-      if (locale === "en") {
-        const body = `<h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 16px;">${days} days in a row.</h1>
-<p>You regulated ${days} days straight. That's not nothing — that's a nervous system trained.</p>
-${btn("See my score", `${url}/score`)}`
-        return {
-          subject: `${days}-day streak — you trained your system`,
-          html: shell({ locale, preheader: `${days} days regulated.`, bodyHtml: body }),
-          text: `${days} days regulated. ${url}/score`,
-        }
-      }
-      const body = `<h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 16px;">${days} jours d'affilée.</h1>
-<p>Tu as régulé ${days} jours d'affilée. C'est pas rien — c'est un système nerveux entraîné.</p>
-${btn("Voir mon score", `${url}/score`)}`
-      return {
-        subject: `${days} jours d'affilée — bravo`,
-        html: shell({ locale, preheader: `${days} jours régulés.`, bodyHtml: body }),
-        text: `${days} jours régulés. ${url}/score`,
-      }
-    }
+    case "protocol_streak":
+      return renderProtocolStreak(locale, ctx)
   }
 }

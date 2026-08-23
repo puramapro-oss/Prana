@@ -6,7 +6,13 @@
  * postgrest-js v12 GenericSchema constraint. CRITICAL: `Row` types must be
  * inline anonymous object literals (NOT named interfaces) to satisfy
  * `Record<string, unknown>` index signature compatibility.
+ *
+ * NOTE: max-lines disabled for this file as it's a comprehensive type definition
+ * that must stay cohesive. Will be auto-generated in P8, at which point we'll
+ * use Supabase CLI's native output (which also exceeds 300 lines).
  */
+
+/* eslint-disable max-lines */
 
 export type Plan = "free" | "starter" | "pro" | "ultime"
 export type Locale = "fr" | "en"

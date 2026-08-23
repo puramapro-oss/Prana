@@ -18,38 +18,13 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { useTwin, useRebuildTwin, useUpdateTwin } from "@/hooks/use-twin"
 import { toast } from "sonner"
-import type { Plan, TwinCommunicationStyle, TwinWorkingHabits } from "@/lib/supabase/types"
 import { cn } from "@/lib/utils"
+import type { Plan, TwinCommunicationStyle, TwinWorkingHabits } from "@/lib/supabase/types"
+import { OverviewCard } from "./twin-overview-card"
+import { TONE_LABEL, LENGTH_LABEL, FORMALITY_LABEL, FOCUS_LABEL } from "./twin-labels"
 
 interface TwinOverviewProps {
   plan: Plan
-}
-
-const TONE_LABEL: Record<string, string> = {
-  casual: "Décontracté",
-  warm: "Chaleureux",
-  professional: "Professionnel",
-  direct: "Direct",
-  playful: "Joueur",
-}
-
-const LENGTH_LABEL: Record<string, string> = {
-  short: "Court",
-  medium: "Moyen",
-  long: "Long",
-}
-
-const FORMALITY_LABEL: Record<string, string> = {
-  low: "Tutoiement",
-  medium: "Mixte",
-  high: "Vouvoiement",
-}
-
-const FOCUS_LABEL: Record<string, string> = {
-  morning: "Matin",
-  afternoon: "Après-midi",
-  evening: "Soir",
-  night: "Nuit",
 }
 
 export function TwinOverview({ plan }: TwinOverviewProps) {
@@ -302,36 +277,6 @@ export function TwinOverview({ plan }: TwinOverviewProps) {
           </div>
         </div>
       ) : null}
-    </div>
-  )
-}
-
-interface OverviewCardProps {
-  icon: React.ReactNode
-  title: string
-  items: (string | null)[]
-  empty: string
-}
-
-function OverviewCard({ icon, title, items, empty }: OverviewCardProps) {
-  const filtered = items.filter((x): x is string => Boolean(x))
-  return (
-    <div className="rounded-xl border border-border/50 bg-card/60 p-4">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-        <span className="text-primary">{icon}</span>
-        <span>{title}</span>
-      </div>
-      {filtered.length > 0 ? (
-        <ul className="mt-3 space-y-1.5 text-sm">
-          {filtered.map((it, i) => (
-            <li key={i} className="leading-snug">
-              {it}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 text-xs text-muted-foreground italic">{empty}</p>
-      )}
     </div>
   )
 }

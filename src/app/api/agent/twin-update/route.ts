@@ -188,6 +188,7 @@ export async function POST(req: NextRequest) {
         tier: "deep", // opus-4-7
         maxTokens: 4000,
         temperature: 0.3,
+        userId: user.id,
       })
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("twin_timeout")), TIMEOUT_MS),

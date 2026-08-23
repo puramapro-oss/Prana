@@ -196,6 +196,7 @@ export async function POST(req: NextRequest) {
         tier: "default",
         maxTokens: 2400,
         temperature: 0.5,
+        userId: user.id,
       })
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("plan_7days_timeout")), TIMEOUT_MS),
