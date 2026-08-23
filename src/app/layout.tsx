@@ -11,6 +11,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PostHogProvider } from "@/components/analytics/posthog-provider"
 import { SentryInit } from "@/components/analytics/sentry-init"
 import { SwRegister } from "@/components/shared/sw-register"
+import { CookieConsentBannerMount } from "@/components/legal/cookie-consent-banner-mount"
 
 const inter = Inter({
   variable: "--font-sans",
@@ -122,6 +123,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <QueryProvider>
               {children}
               <Toaster position="top-center" richColors closeButton />
+              <CookieConsentBannerMount />
             </QueryProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

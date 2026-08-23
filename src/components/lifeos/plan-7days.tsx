@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import type { Plan, LifeosPlan } from "@/lib/supabase/types"
 import type { Plan7DaysOutput } from "@/lib/agent/prompts/plan-7days"
+import AIDisclosure from "@/lib/legal/components/AIDisclosure"
 
 interface Plan7DaysViewProps {
   plan: Plan
@@ -191,6 +192,7 @@ export function Plan7DaysView({ plan }: Plan7DaysViewProps) {
         </Button>
       </div>
 
+      <AIDisclosure appName="PURAMA ONE" />
       <p className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground/90">
         {data.summary}
       </p>

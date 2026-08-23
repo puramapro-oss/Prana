@@ -10,7 +10,7 @@ const TABS = [
   { href: "/settings/referral", label: "Parrainage" },
   { href: "/settings/safety", label: "Sécurité" },
   { href: "/settings/notifications", label: "Notifications" },
-  { href: "/settings/data", label: "Données" },
+  { href: "/settings/data", label: "Ma mémoire" },
 ]
 
 export function SettingsTabs() {

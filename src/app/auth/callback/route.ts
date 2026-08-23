@@ -3,6 +3,9 @@ import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { addDays } from "date-fns"
+import { CURRENT_LEGAL_VERSIONS } from "@/lib/legal/versions"
+import type { LegalDocType } from "@/lib/legal/types"
+import { getRequestMeta } from "@/lib/legal/request-meta"
 
 const REF_COOKIE = "prana_ref"
 
@@ -43,10 +46,27 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (profile && !profile.trial_ends_at) {
-      await admin
-        .from("profiles")
-        .update({ trial_ends_at: addDays(new Date(), 7).toISOString() })
-        .eq("id", userId)
+      // Preuve d'acceptation CGU/CGV/confidentialité au premier login — version toujours
+      // dérivée côté serveur (jamais envoyée par le client), cf LegalAcceptanceNotice sur /signup.
+      // Écriture indépendante du trial : les deux tournent en parallèle.
+      const { ip, userAgent } = getRequestMeta(request)
+      const docTypes: LegalDocType[] = ["mentions", "cgu", "cgv", "confidentialite"]
+      await Promise.all([
+        admin
+          .from("profiles")
+          .update({ trial_ends_at: addDays(new Date(), 7).toISOString() })
+          .eq("id", userId),
+        admin.from("legal_acceptances").upsert(
+          docTypes.map((docType) => ({
+            user_id: userId,
+            doc_type: docType,
+            version: CURRENT_LEGAL_VERSIONS[docType],
+            ip,
+            user_agent: userAgent,
+          })),
+          { onConflict: "user_id,doc_type" },
+        ),
+      ])
     }
 
     // Referral attribution: only on first ever signup, only if ref present and resolves

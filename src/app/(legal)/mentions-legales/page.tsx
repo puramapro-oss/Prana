@@ -15,8 +15,9 @@ export default function MentionsLegalesPage() {
         <strong>TVA :</strong> non applicable, art. 293 B du CGI.
       </p>
       <p>
-        <strong>Hébergeur :</strong> Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA — pour le
-        frontend. Hostinger International Ltd., Vilnius, Lituanie — pour le backend Supabase auto-hébergé.
+        <strong>Hébergeur :</strong> Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, USA — pour le
+        frontend. Hostinger International Ltd. — pour le backend Supabase auto-hébergé (serveur physique situé à
+        Paris, France).
       </p>
       <p>
         <strong>Contact :</strong>{" "}

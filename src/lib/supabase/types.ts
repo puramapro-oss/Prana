@@ -724,6 +724,82 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_acceptances: {
+        Row: {
+          id: string
+          user_id: string
+          doc_type: "mentions" | "cgu" | "cgv" | "confidentialite"
+          version: string
+          accepted_at: string
+          ip: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          doc_type: "mentions" | "cgu" | "cgv" | "confidentialite"
+          version: string
+          accepted_at?: string
+          ip?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          version?: string
+          accepted_at?: string
+        }
+        Relationships: []
+      }
+      cookie_consents: {
+        Row: {
+          user_id: string
+          necessaire: boolean
+          mesure: boolean
+          marketing: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          necessaire?: boolean
+          mesure?: boolean
+          marketing?: boolean
+          updated_at?: string
+        }
+        Update: {
+          necessaire?: boolean
+          mesure?: boolean
+          marketing?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      account_deletion_requests: {
+        Row: {
+          id: string
+          user_id: string
+          requested_at: string
+          scheduled_for: string
+          reason: string | null
+          status: "scheduled" | "executing" | "completed" | "cancelled"
+          cancelled_at: string | null
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          requested_at?: string
+          scheduled_for: string
+          reason?: string | null
+          status?: "scheduled" | "executing" | "completed" | "cancelled"
+          cancelled_at?: string | null
+          completed_at?: string | null
+        }
+        Update: {
+          status?: "scheduled" | "executing" | "completed" | "cancelled"
+          cancelled_at?: string | null
+          completed_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: { [k: string]: never }
     Functions: { [k: string]: never }

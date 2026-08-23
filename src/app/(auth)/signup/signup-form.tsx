@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
+import LegalAcceptanceNotice from "@/lib/legal/components/LegalAcceptanceNotice"
 
 export function SignupForm() {
   const searchParams = useSearchParams()
@@ -120,6 +121,12 @@ export function SignupForm() {
               disabled={loading !== null}
             />
           </div>
+          <LegalAcceptanceNotice
+            actionLabel="Créer mon espace"
+            cguHref="/cgu"
+            cgvHref="/cgv"
+            confidentialiteHref="/confidentialite"
+          />
           <Button type="submit" className="w-full" size="lg" disabled={loading !== null || !email}>
             {loading === "email" ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
             Créer mon espace
@@ -132,17 +139,6 @@ export function SignupForm() {
           <Link href="/login" className="text-foreground hover:text-primary underline underline-offset-2">
             Se connecter
           </Link>
-        </p>
-        <p className="text-xs text-muted-foreground/70 text-center">
-          En continuant, tu acceptes nos{" "}
-          <Link href="/cgu" className="underline underline-offset-2">
-            CGU
-          </Link>{" "}
-          et notre{" "}
-          <Link href="/confidentialite" className="underline underline-offset-2">
-            politique de confidentialité
-          </Link>
-          .
         </p>
       </CardFooter>
     </Card>

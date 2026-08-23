@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import type { MagicButtonConfig } from "@/lib/agent/magic-buttons-config"
 import type { MagicButtonResponse } from "@/lib/agent/prompts/magic-buttons"
 import { track } from "@/lib/analytics"
+import AIDisclosure from "@/lib/legal/components/AIDisclosure"
 
 interface MagicButtonModalProps {
   button: MagicButtonConfig
@@ -194,6 +195,7 @@ export function MagicButtonModal({ button, locked, open, onOpenChange }: MagicBu
           </div>
         ) : (
           <div className="space-y-5 py-2">
+            <AIDisclosure appName="PURAMA ONE" />
             <p className="text-base leading-relaxed text-foreground/90">{result?.intro}</p>
 
             {result?.protocol_steps.length ? (

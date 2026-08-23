@@ -55,6 +55,14 @@ export default function ConfidentialitePage() {
         Données conservées tant que ton compte est actif. À la suppression, toutes tes données privées sont
         effacées sous 30 jours, sauf obligations légales (factures : 10 ans).
       </p>
+
+      <h2>8. Cookies</h2>
+      <p>
+        Nous utilisons des cookies strictement nécessaires (authentification, session), déposés sans consentement
+        préalable, ainsi que des cookies de mesure d&apos;audience et de personnalisation déposés uniquement après
+        ton consentement explicite, recueilli via le bandeau affiché à ta première visite. Tu peux modifier tes
+        choix à tout moment en effaçant les données de navigation de ce site dans ton navigateur.
+      </p>
     </div>
   )
 }
