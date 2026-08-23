@@ -12,6 +12,7 @@ import { useGenerateExecution, useMarkExecutionUsed } from "@/hooks/use-execute"
 import { cn } from "@/lib/utils"
 import type { ExecutionType, Plan } from "@/lib/supabase/types"
 import type { ExecuteAlternative, ExecuteOutput } from "@/lib/agent/prompts/execute"
+import AIDisclosure from "@/lib/legal/components/AIDisclosure"
 
 interface ExecuteWorkflowProps {
   type: ExecutionType
@@ -186,6 +187,7 @@ export function ExecuteWorkflow({
 
       {output ? (
         <div className="space-y-4">
+          <AIDisclosure appName="PURAMA ONE" />
           <p className="rounded-xl border border-primary/30 bg-primary/[0.05] px-4 py-3 text-sm leading-relaxed text-foreground/90">
             {output.guidance}
           </p>

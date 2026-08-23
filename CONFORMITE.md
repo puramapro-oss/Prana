@@ -98,4 +98,66 @@ Aucune mécanique d'avis rémunérés trouvée (aucun match `avis vérifié/rém
 
 **Points conformes (VERT)** : famille déclarée = code réel (§1 partiel), bandeau cookies fonctionnel dans son UI (§2 partiel), export/suppression RGPD réels et testés (§4), lexique interdit 0 occurrence + garde-fous IA explicites (§6), chiffres cohérents avec FACTS.md (§7), blocage migration documenté le jour même dans ERRORS.md (§8 partiel).
 
+---
+
+## Remédiation — 2026-08-23
+
+Périmètre strict : les 7 écarts ci-dessus. Médiateur (GAP 1) et Sign in with Apple (GAP 7) laissés
+honnêtement hors périmètre (le premier nécessite une vraie souscription à un médiateur agréé, le
+second une intégration native App/Play Store — pas des corrections de code sur ce dépôt).
+
+**SSH VPS re-testé au début de cette remédiation** (protocole : mot de passe relu depuis
+`grep VPS_SSH_PASSWORD .env.secrets`, PAS supposé mauvais) : `sshpass -p "$VPS_SSH_PASSWORD" ssh
+root@72.62.191.111 "echo OK"` → `Connection refused` port 22. Retest avec la clé de secours
+(`ssh -i ~/.ssh/purama_vps_ed25519`) → même refus. Blocage réseau réel et confirmé, pas un problème
+de credentials. Fallback appliqué : API pg-meta Supabase (`POST https://auth.purama.dev/pg/query`,
+header `apikey: $SUPABASE_SERVICE_ROLE_KEY`, cf PIEGES.md §"Alternative sans SSH") — fonctionnelle,
+testée d'abord avec `select 1`.
+
+- **GAP 2 — CORRIGÉ le 2026-08-23** : clause "Données de santé — consentement renforcé (art. 9
+  RGPD)" ajoutée à `src/app/(legal)/confidentialite/page.tsx` (nouvelle section 3, ancienne
+  numérotation 3-8 décalée à 4-9) : mentionne explicitement la collecte réelle HealthKit
+  (`heartRate`, `mindfulSession`) / Health Connect via PRANA Watch, la base légale art. 9.2.a RGPD
+  (consentement explicite via l'autorisation OS), la révocabilité, et l'engagement "jamais utilisées
+  à des fins publicitaires, jamais cédées ni vendues". Section "Données collectées" (§2) complétée en
+  cohérence. Comme ce contenu réel change matériellement (donnée de santé sensible ajoutée),
+  `CURRENT_LEGAL_VERSIONS.confidentialite` bumpée `1.0` → `1.1` dans `src/lib/legal/versions.ts`
+  (+ entrée `LEGAL_VERSIONS_HISTORY`), pour que les utilisateurs déjà inscrits soient re-sollicités
+  par le gate ci-dessous plutôt que de rester silencieusement sur l'ancien texte.
+- **GAP 3 — CORRIGÉ le 2026-08-23** : `src/components/analytics/posthog-provider.tsx` lit désormais
+  `useCookieConsent()` et n'importe/n'initialise `posthog-js` que si `consent.mesure === true`
+  (après hydratation `useSyncExternalStore`, donc jamais de flash SSR). Si le consentement est
+  retiré après coup (bandeau "Personnaliser"), `posthog.opt_out_capturing()` est appelé sur
+  l'instance déjà chargée plutôt que de la laisser tourner ; un retour à `true` appelle
+  `opt_in_capturing()`. Plus aucun cookie de mesure déposé avant consentement explicite — cohérent
+  avec le texte de `confidentialite/page.tsx` §9.
+- **GAP 4 — CORRIGÉ le 2026-08-23** : migration `supabase/migrations/0009_legal_core.sql` exécutée
+  via l'API pg-meta (SSH confirmé bloqué, cf ci-dessus) — vérifié après coup par requête
+  `information_schema.tables` : `legal_acceptances`, `cookie_consents`, `account_deletion_requests`
+  existent bien dans le schéma `prana`, RLS activée sur les 3 (`pg_tables.rowsecurity = true`). La
+  preuve d'acceptation CGU est maintenant réellement opérationnelle en production.
+- **GAP 5 — CORRIGÉ le 2026-08-23** : `<AIDisclosure appName="PURAMA ONE" />` monté dans
+  `src/components/execute/execute-workflow.tsx`, juste au-dessus du contenu généré par l'IA
+  (`output.guidance` + alternatives), même emplacement/wording que `magic-button-modal.tsx` et
+  `plan-7days.tsx`.
+- **GAP 6 — CORRIGÉ le 2026-08-23** : `LegalReacceptanceGate` monté dans `src/app/(app)/layout.tsx`
+  — lecture de `legal_acceptances` de l'utilisateur courant côté serveur, `computeDocsEnAttente()`
+  passé à un nouveau pont client `src/components/legal/legal-reacceptance-gate-mount.tsx` (branché
+  sur `POST /api/legal/accept`, même endpoint que `LegalAcceptanceNotice` au signup). Bug latent
+  corrigé au passage dans `LegalReacceptanceGate.tsx` : les liens "Lire « ... »" pointaient vers
+  `/politique-confidentialite` et `/mentions` (routes génériques du socle), qui n'existent pas dans
+  PRANA (routes réelles : `/confidentialite`, `/mentions-legales`) — remplacés par une table
+  `DOC_ROUTES` explicite, sinon le gate nouvellement monté aurait affiché un lien mort. Le bump de
+  version du GAP 2 rend ce gate immédiatement vérifiable : les utilisateurs déjà inscrits seront
+  re-sollicités pour `confidentialite` à leur prochaine visite.
+
+**Vérifié** : `npx tsc --noEmit` → 0 erreur. `npm run build` → succès (70 routes générées, y compris
+`(app)`). `npx eslint` sur les 7 fichiers touchés (`--max-warnings 0`) → 0 erreur/warning.
+
+**Non corrigés (hors périmètre, documentés pour mémoire)** :
+- GAP 1 (médiateur absent des pages réelles) — nécessite une vraie souscription à un médiateur de
+  la consommation agréé, pas une correction de code.
+- GAP 7 (Sign in with Apple absent) — nécessite une intégration native + configuration Apple
+  Developer, hors périmètre code de cette remédiation.
+
 VERDICT:prana:ORANGE:7

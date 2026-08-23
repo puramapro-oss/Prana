@@ -8,6 +8,9 @@ import { shouldShowConsultPrompt } from "@/lib/safety/consult-prompt-gate"
 import { Sidebar } from "@/components/layout/sidebar"
 import { BottomTabs } from "@/components/layout/bottom-tabs"
 import { PulseCheckCompact } from "@/components/pulse/pulse-check-compact"
+import { LegalReacceptanceGateMount } from "@/components/legal/legal-reacceptance-gate-mount"
+import { computeDocsEnAttente } from "@/lib/legal/versions"
+import type { LegalDocType } from "@/lib/legal/types"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -26,6 +29,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const displayName = profile?.display_name ?? user.email?.split("@")[0] ?? "toi"
   const plan = profile?.plan ?? "free"
   const showConsultPrompt = await shouldShowConsultPrompt(user.id)
+
+  const { data: acceptances } = await supabase
+    .from("legal_acceptances")
+    .select("doc_type, version")
+    .eq("user_id", user.id)
+  const dernieresAcceptations = Object.fromEntries(
+    (acceptances ?? []).map((a) => [a.doc_type, a.version]),
+  ) as Partial<Record<LegalDocType, string>>
+  const docsEnAttente = computeDocsEnAttente(dernieresAcceptations)
 
   return (
     <div className="min-h-svh">
@@ -54,6 +66,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <BottomTabs />
       <SOSFloatingButton />
       <ProConsultPrompt defaultOpen={showConsultPrompt} />
+      <LegalReacceptanceGateMount docsEnAttente={docsEnAttente} />
     </div>
   )
 }

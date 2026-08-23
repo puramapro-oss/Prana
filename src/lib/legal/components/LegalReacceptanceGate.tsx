@@ -10,6 +10,14 @@ const DOC_LABELS: Record<LegalDocType, string> = {
   confidentialite: 'Politique de confidentialité',
 };
 
+/** Routes réelles PRANA (`src/app/(legal)/*`) — un groupe de routes ne change pas l'URL. */
+const DOC_ROUTES: Record<LegalDocType, string> = {
+  mentions: 'mentions-legales',
+  cgu: 'cgu',
+  cgv: 'cgv',
+  confidentialite: 'confidentialite',
+};
+
 export interface LegalReacceptanceGateProps {
   appName: string;
   /** Docs dont la version acceptée par l'utilisateur est strictement antérieure à la version courante. */
@@ -53,7 +61,7 @@ export default function LegalReacceptanceGate({ appName, docsEnAttente, onAccept
         <p className="text-sm text-foreground">
           {appName} a mis à jour son document « {DOC_LABELS[current]} ». Merci d&apos;en prendre connaissance avant de continuer.
         </p>
-        <a href={`/${current === 'confidentialite' ? 'politique-confidentialite' : current}`} target="_blank" rel="noopener noreferrer" className="text-sm underline text-primary">
+        <a href={`/${DOC_ROUTES[current]}`} target="_blank" rel="noopener noreferrer" className="text-sm underline text-primary">
           Lire « {DOC_LABELS[current]} »
         </a>
         <button

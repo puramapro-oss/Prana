@@ -17,7 +17,7 @@ export const CURRENT_LEGAL_VERSIONS: Record<LegalDocType, string> = {
   mentions: '1.0',
   cgu: '1.0',
   cgv: '1.0',
-  confidentialite: '1.0',
+  confidentialite: '1.1',
 };
 
 /**
@@ -39,5 +39,13 @@ export const LEGAL_VERSIONS_HISTORY: Record<LegalDocType, Array<{ version: strin
   mentions: [{ version: '1.0', date: '2026-08-23', changement: 'Création du socle générique NIYAMA (T3).' }],
   cgu: [{ version: '1.0', date: '2026-08-23', changement: 'Création du socle générique NIYAMA (T3).' }],
   cgv: [{ version: '1.0', date: '2026-08-23', changement: 'Création du socle générique NIYAMA (T3).' }],
-  confidentialite: [{ version: '1.0', date: '2026-08-23', changement: 'Création du socle générique NIYAMA (T3).' }],
+  confidentialite: [
+    { version: '1.0', date: '2026-08-23', changement: 'Création du socle générique NIYAMA (T3).' },
+    {
+      version: '1.1',
+      date: '2026-08-23',
+      changement:
+        "Ajout de la clause données de santé renforcée (art. 9 RGPD) pour la collecte réelle de rythme cardiaque et de séances de pleine conscience via HealthKit/Health Connect (PRANA Watch) — remédiation CONFORMITE.md GAP 2.",
+    },
+  ],
 };
