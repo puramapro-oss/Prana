@@ -1,4 +1,4 @@
-import type { Plan } from "@/lib/supabase/types"
+import type { Plan } from "../supabase/types/scalars"
 import { ADVANCED_PROTOCOLS } from "./protocols-advanced"
 
 export type ProtocolStepType = "breath" | "ground" | "stretch" | "visualize" | "rest" | "say"

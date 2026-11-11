@@ -1,142 +1,80 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { View, Text, Pressable, AppState } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import * as Haptics from "expo-haptics"
-import { ArrowLeft, Pause, Play, X } from "lucide-react-native"
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, cancelAnimation } from "react-native-reanimated"
+import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+import { ArrowLeft } from "lucide-react-native"
 import { Button } from "@/components/Button"
 import { colors } from "@/lib/theme"
+import { findProtocol } from "../../../src/lib/regulate/protocols"
+import {
+  expandProtocol,
+  initialPlayback,
+  interruptPlayback,
+  pausePlayback,
+  resumePlayback,
+  startPlayback,
+  tickPlayback,
+  type PlaybackState,
+} from "../../../src/lib/regulate/playback"
 
-interface Step {
-  label: string
-  durationSec: number
-  scale: number
-}
-
-interface Protocol {
-  slug: string
-  name: string
-  steps: Step[]
-}
-
-const PROTOCOLS: Record<string, Protocol> = {
-  "478-breath": {
-    slug: "478-breath",
-    name: "Respiration 4-7-8",
-    steps: [
-      { label: "Inspire 4s", durationSec: 4, scale: 1.6 },
-      { label: "Retiens 7s", durationSec: 7, scale: 1.6 },
-      { label: "Expire 8s", durationSec: 8, scale: 1.0 },
-    ],
-  },
-  "box-breath": {
-    slug: "box-breath",
-    name: "Respiration carrée",
-    steps: [
-      { label: "Inspire 4s", durationSec: 4, scale: 1.6 },
-      { label: "Retiens 4s", durationSec: 4, scale: 1.6 },
-      { label: "Expire 4s", durationSec: 4, scale: 1.0 },
-      { label: "Retiens 4s", durationSec: 4, scale: 1.0 },
-    ],
-  },
-  "physio-sigh": {
-    slug: "physio-sigh",
-    name: "Soupir physiologique",
-    steps: [
-      { label: "1ère inspiration", durationSec: 2, scale: 1.4 },
-      { label: "2ème inspiration courte", durationSec: 1, scale: 1.6 },
-      { label: "Longue expiration", durationSec: 6, scale: 1.0 },
-    ],
-  },
-  "coherence": {
-    slug: "coherence",
-    name: "Cohérence cardiaque",
-    steps: [
-      { label: "Inspire 5s", durationSec: 5, scale: 1.6 },
-      { label: "Expire 5s", durationSec: 5, scale: 1.0 },
-    ],
-  },
-}
-
-const FALLBACK: Protocol = {
-  slug: "fallback",
-  name: "Respiration calme",
-  steps: [
-    { label: "Inspire 4s", durationSec: 4, scale: 1.6 },
-    { label: "Expire 6s", durationSec: 6, scale: 1.0 },
-  ],
+function slugParam(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? ""
+  return value ?? ""
 }
 
 export default function ProtocolPlayer() {
-  const { slug } = useLocalSearchParams<{ slug: string }>()
+  const params = useLocalSearchParams<{ slug: string | string[] }>()
+  const slug = slugParam(params.slug)
   const router = useRouter()
-  const proto = useMemo(() => (slug && PROTOCOLS[slug as string]) || FALLBACK, [slug])
-
-  const [phase, setPhase] = useState<"before" | "running" | "done">("before")
-  const [stepIdx, setStepIdx] = useState(0)
-  const [secondsLeft, setSecondsLeft] = useState(proto.steps[0]?.durationSec ?? 0)
-  const cyclesRef = useRef(0)
-  const targetCycles = 6
-
+  const protocol = useMemo(() => (slug ? findProtocol(slug) : null), [slug])
+  const beats = useMemo(() => (protocol ? expandProtocol(protocol) : []), [protocol])
+  const [playback, setPlayback] = useState<PlaybackState>(() => initialPlayback(beats))
   const scale = useSharedValue(1)
 
   useEffect(() => {
-    if (phase !== "running") return
-    const step = proto.steps[stepIdx]
-    if (!step) return
+    setPlayback(initialPlayback(beats))
+  }, [beats])
 
+  useEffect(() => {
+    if (playback.status !== "running") return
+    const timer = setInterval(() => {
+      setPlayback((current) => tickPlayback(current, beats))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [beats, playback.status])
+
+  useEffect(() => {
+    if (playback.status !== "running") return
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft).catch(() => {})
+  }, [playback.beatIndex, playback.status])
 
-    cancelAnimation(scale)
-    scale.value = withTiming(step.scale, {
-      duration: step.durationSec * 1000,
+  useEffect(() => {
+    const beat = beats[playback.beatIndex]
+    if (playback.status !== "running" || !beat) {
+      cancelAnimation(scale)
+      return
+    }
+    scale.value = withTiming(beat.scale, {
+      duration: Math.max(playback.secondsLeft, 0) * 1000,
       easing: Easing.inOut(Easing.cubic),
     })
-
-    setSecondsLeft(step.durationSec)
-    const tick = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(tick)
-          return 0
-        }
-        return s - 1
-      })
-    }, 1000)
-    const next = setTimeout(() => {
-      const isLastStep = stepIdx >= proto.steps.length - 1
-      if (isLastStep) {
-        cyclesRef.current += 1
-        if (cyclesRef.current >= targetCycles) {
-          setPhase("done")
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
-          return
-        }
-        setStepIdx(0)
-      } else {
-        setStepIdx((i) => i + 1)
-      }
-    }, step.durationSec * 1000)
-
-    return () => {
-      clearInterval(tick)
-      clearTimeout(next)
-    }
-  }, [phase, stepIdx, proto.steps, scale])
+  }, [beats, playback.beatIndex, playback.status, scale])
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
-      if (state === "background" && phase === "running") setPhase("before")
+      if (state === "background") setPlayback((current) => interruptPlayback(current))
     })
     return () => sub.remove()
-  }, [phase])
+  }, [])
 
+  const beat = beats[playback.beatIndex]
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   return (
     <SafeAreaView edges={["top", "bottom"]} className="flex-1 bg-bg">
-      <View className="px-6 pt-2 flex-row justify-between">
+      <View className="px-6 pt-2">
         <Pressable
           testID="protocol-back"
           onPress={() => router.back()}
@@ -146,59 +84,84 @@ export default function ProtocolPlayer() {
         >
           <ArrowLeft size={20} color={colors.ivory} />
         </Pressable>
-        {phase !== "before" ? (
-          <Pressable
-            testID="protocol-stop"
-            onPress={() => router.back()}
-            className="size-10 items-center justify-center"
-          >
-            <X size={20} color={colors.muted} />
-          </Pressable>
-        ) : null}
       </View>
 
       <View className="flex-1 items-center justify-center px-6 gap-6">
-        <Text className="text-primary text-xs uppercase tracking-wider">{proto.name}</Text>
-
-        {phase === "before" ? (
+        {!protocol ? (
           <>
-            <Animated.View
-              className="size-48 rounded-full bg-primary/20 items-center justify-center"
-            >
-              <Text className="text-ivory text-base">Prêt·e ?</Text>
-            </Animated.View>
+            <Text className="text-ivory text-2xl font-heading text-center">Protocole introuvable</Text>
             <Text className="text-muted text-center max-w-xs">
-              Trouve une position confortable. Suit le rond. Pas besoin de réussir, juste de suivre.
+              « {slug || "vide"} » ne fait pas partie du catalogue PRANA. Aucune séance de remplacement n'est lancée.
             </Text>
-            <Button testID="protocol-start" onPress={() => setPhase("running")}>
-              Démarrer
+            <Button testID="protocol-missing" haptic={false} onPress={() => router.back()}>
+              Retour à la liste
             </Button>
           </>
-        ) : phase === "running" ? (
+        ) : playback.status === "done" ? (
           <>
-            <Animated.View
-              style={animStyle}
-              className="size-56 rounded-full bg-primary/30 items-center justify-center"
-            >
-              <Text className="text-ivory text-lg font-heading">{proto.steps[stepIdx]?.label}</Text>
-              <Text className="text-ivory text-4xl font-heading mt-1">{secondsLeft}</Text>
-            </Animated.View>
-            <Text className="text-muted text-sm">
-              Cycle {cyclesRef.current + 1} / {targetCycles}
+            <Text className="text-ivory text-2xl font-heading text-center">
+              {playback.notice ?? "Terminé."}
             </Text>
+            <Text className="text-muted text-center max-w-xs">
+              {playback.notice
+                ? "Rien n'a été joué."
+                : "La séance reste sur cet appareil. Elle n'est pas enregistrée sur le compte."}
+            </Text>
+            <Button testID="protocol-done" haptic={false} onPress={() => router.replace("/(tabs)/today")}>
+              Retour à aujourd'hui
+            </Button>
           </>
         ) : (
           <>
-            <View className="size-48 rounded-full bg-primary/30 items-center justify-center">
-              <Text className="text-ivory text-3xl font-heading">✓</Text>
-            </View>
-            <Text className="text-ivory text-2xl font-heading text-center">Terminé.</Text>
-            <Text className="text-muted text-center max-w-xs">
-              Comment te sens-tu ? Note ton pulse pour qu&apos;on personnalise la suite.
-            </Text>
-            <Button testID="protocol-done" onPress={() => router.replace("/(tabs)/today")}>
-              Retour à aujourd&apos;hui
-            </Button>
+            <Text className="text-primary text-xs uppercase tracking-wider">{protocol.name_fr}</Text>
+            {playback.status === "ready" ? (
+              <>
+                <Text className="text-ivory text-center text-lg">{protocol.description_fr}</Text>
+                <Text className="text-muted text-center max-w-xs">
+                  Hors connexion, seules ces étapes déjà incluses sont disponibles. La vibration peut manquer sans empêcher la séance.
+                </Text>
+                <Button
+                  testID="protocol-start"
+                  haptic={false}
+                  disabled={beats.length === 0}
+                  onPress={() => setPlayback((current) => startPlayback(current, beats))}
+                >
+                  Démarrer
+                </Button>
+              </>
+            ) : (
+              <>
+                <Animated.View
+                  style={animStyle}
+                  className="size-56 rounded-full bg-primary/30 items-center justify-center px-4"
+                >
+                  <Text className="text-ivory text-lg font-heading text-center">{beat?.label}</Text>
+                  <Text className="text-ivory text-4xl font-heading mt-1">{playback.secondsLeft}</Text>
+                </Animated.View>
+                {beat?.detail ? <Text className="text-muted text-center max-w-xs">{beat.detail}</Text> : null}
+                {playback.notice ? (
+                  <Text accessibilityRole="alert" className="text-ivory text-center max-w-xs">
+                    {playback.notice}
+                  </Text>
+                ) : (
+                  <Text className="text-muted text-sm">
+                    Étape {(beat?.stepIndex ?? 0) + 1} / {protocol.steps.length}
+                  </Text>
+                )}
+                <Button
+                  testID={playback.status === "running" ? "protocol-pause" : "protocol-resume"}
+                  haptic={false}
+                  accessibilityLabel={playback.status === "running" ? "Mettre en pause" : "Reprendre"}
+                  onPress={() =>
+                    setPlayback((current) =>
+                      current.status === "running" ? pausePlayback(current) : resumePlayback(current),
+                    )
+                  }
+                >
+                  {playback.status === "running" ? "Pause" : "Reprendre"}
+                </Button>
+              </>
+            )}
           </>
         )}
       </View>
