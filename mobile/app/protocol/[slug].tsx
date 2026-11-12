@@ -64,7 +64,7 @@ export default function ProtocolPlayer() {
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
-      if (state === "background") setPlayback((current) => interruptPlayback(current))
+      if (state !== "active") setPlayback((current) => interruptPlayback(current))
     })
     return () => sub.remove()
   }, [])
@@ -80,7 +80,7 @@ export default function ProtocolPlayer() {
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Retour"
-          className="size-10 items-center justify-center"
+          className="min-h-11 min-w-11 items-center justify-center"
         >
           <ArrowLeft size={20} color={colors.ivory} />
         </Pressable>
@@ -133,6 +133,12 @@ export default function ProtocolPlayer() {
               <>
                 <Animated.View
                   style={animStyle}
+                  accessibilityRole="timer"
+                  accessibilityLabel={
+                    beat
+                      ? `${beat.label}, ${playback.secondsLeft} secondes restantes`
+                      : "Lecture du protocole"
+                  }
                   className="size-56 rounded-full bg-primary/30 items-center justify-center px-4"
                 >
                   <Text className="text-ivory text-lg font-heading text-center">{beat?.label}</Text>

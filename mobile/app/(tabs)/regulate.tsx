@@ -7,6 +7,7 @@ import { ArrowRight, Lock } from "lucide-react-native"
 import { GlassCard } from "@/components/GlassCard"
 import { colors } from "@/lib/theme"
 import {
+  categoryLabel,
   PROTOCOL_CATEGORIES,
   PROTOCOLS,
   type ProtocolCategory,
@@ -25,6 +26,8 @@ export default function RegulateScreen() {
       if (!query) return true
       return (
         protocol.name_fr.toLowerCase().includes(query) ||
+        protocol.name_en.toLowerCase().includes(query) ||
+        protocol.slug.toLowerCase().includes(query) ||
         protocol.description_fr.toLowerCase().includes(query)
       )
     })
@@ -53,11 +56,14 @@ export default function RegulateScreen() {
             <Pressable
               key={category.value}
               testID={`filter-${category.value}`}
+              accessibilityRole="button"
+              accessibilityLabel={category.label}
+              accessibilityState={{ selected: filter === category.value }}
               onPress={() => {
                 Haptics.selectionAsync().catch(() => {})
                 setFilter(category.value)
               }}
-              className={`h-9 px-3 rounded-full border items-center justify-center ${
+              className={`min-h-11 px-3 rounded-full border items-center justify-center ${
                 filter === category.value ? "bg-ivory border-ivory" : "bg-surface border-border"
               }`}
             >
@@ -96,7 +102,7 @@ export default function RegulateScreen() {
                         <Text className="text-ivory text-base font-semibold">{protocol.name_fr}</Text>
                         <Text className="text-muted text-sm mt-0.5">{protocol.description_fr}</Text>
                         <Text className="text-muted text-xs mt-2">
-                          {formatProtocolDuration(protocol.duration_seconds)} · {protocol.category}
+                          {formatProtocolDuration(protocol.duration_seconds)} · {categoryLabel(protocol.category)}
                         </Text>
                       </View>
                       {locked ? (

@@ -231,3 +231,7 @@ export const PROTOCOL_CATEGORIES: { value: ProtocolCategory | "all"; label: stri
   { value: "energy", label: "Énergie" },
   { value: "fatigue", label: "Fatigue" },
 ]
+
+export function categoryLabel(category: ProtocolCategory | "all"): string {
+  return PROTOCOL_CATEGORIES.find((item) => item.value === category)?.label ?? category
+}

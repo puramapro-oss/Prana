@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "vitest"
 import {
   expandProtocol,
+  formatProtocolDuration,
   initialPlayback,
   interruptPlayback,
   pausePlayback,
@@ -10,7 +11,7 @@ import {
   tickPlayback,
   type PlaybackBeat,
 } from "./playback"
-import { findProtocol, type ProtocolBreathStep } from "./protocols"
+import { categoryLabel, findProtocol, PROTOCOLS, type ProtocolBreathStep, type ProtocolDefinition } from "./protocols"
 
 function breath(slug: string): ProtocolBreathStep {
   const protocol = findProtocol(slug)
@@ -74,6 +75,47 @@ describe("interruption et reprise", () => {
     state = tickPlayback(state, beats)
     assert.equal(state.status, "done")
     assert.equal(startPlayback(state, beats), state)
+  })
+
+  it("la pause puis la reprise gardent la seconde en cours", () => {
+    let state = startPlayback(initialPlayback(beats), beats)
+    state = tickPlayback(state, beats)
+    state = resumePlayback(pausePlayback(state))
+    assert.equal(state.status, "running")
+    assert.equal(state.secondsLeft, 3)
+    assert.equal(state.beatIndex, 0)
+  })
+
+  it("affiche les durées sans arrondir une minute et demie à deux minutes", () => {
+    assert.equal(formatProtocolDuration(90), "1 min 30 s")
+    assert.equal(formatProtocolDuration(120), "2 min")
+    assert.equal(formatProtocolDuration(30), "30 s")
+    assert.equal(formatProtocolDuration(59.6), "1 min")
+    assert.equal(formatProtocolDuration(Number.NaN), "durée inconnue")
+    assert.equal(formatProtocolDuration(-4), "durée inconnue")
+  })
+
+  it("nomme les catégories en français", () => {
+    assert.equal(categoryLabel("anxiety"), "Anxiété")
+    assert.equal(categoryLabel("all"), "Tout")
+  })
+
+  it("ignore une phase de durée nulle et joue tout le catalogue", () => {
+    const protocol = findProtocol("box-breathing")
+    assert.ok(protocol)
+    const step = breath("box-breathing")
+    const stripped: ProtocolDefinition = {
+      ...protocol,
+      steps: [{ ...step, hold: 0, hold_after: 0 }],
+    }
+    const phases = expandProtocol(stripped).map((beat) => beat.phase)
+    assert.deepEqual(phases.slice(0, 2), ["inhale", "exhale"])
+    assert.equal(phases.includes("hold"), false)
+    for (const item of PROTOCOLS) {
+      const playable = expandProtocol(item)
+      assert.ok(playable.length > 0, item.slug)
+      assert.ok(playable.every((beat) => beat.durationSec > 0), item.slug)
+    }
   })
 
   it("un protocole sans étape jouable ne démarre pas", () => {

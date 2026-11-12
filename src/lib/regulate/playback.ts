@@ -33,9 +33,12 @@ const INTERRUPT_NOTICE = "Séance interrompue. Tu peux reprendre au même instan
 
 export function formatProtocolDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "durée inconnue"
-  if (seconds < 60) return `${Math.round(seconds)} s`
-  const minutes = Math.round(seconds / 60)
-  return `${minutes} min`
+  const total = Math.round(seconds)
+  if (total < 60) return `${total} s`
+  const minutes = Math.floor(total / 60)
+  const rest = total % 60
+  if (rest === 0) return `${minutes} min`
+  return `${minutes} min ${rest} s`
 }
 
 export function breathPhases(step: ProtocolBreathStep): BreathPhase[] {
