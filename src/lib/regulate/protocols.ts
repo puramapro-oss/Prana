@@ -1,4 +1,4 @@
-import type { Plan } from "@/lib/supabase/types"
+import type { Plan } from "../supabase/types/scalars"
 import { ADVANCED_PROTOCOLS } from "./protocols-advanced"
 
 export type ProtocolStepType = "breath" | "ground" | "stretch" | "visualize" | "rest" | "say"
@@ -231,3 +231,7 @@ export const PROTOCOL_CATEGORIES: { value: ProtocolCategory | "all"; label: stri
   { value: "energy", label: "Énergie" },
   { value: "fatigue", label: "Fatigue" },
 ]
+
+export function categoryLabel(category: ProtocolCategory | "all"): string {
+  return PROTOCOL_CATEGORIES.find((item) => item.value === category)?.label ?? category
+}

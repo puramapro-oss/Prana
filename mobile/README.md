@@ -64,7 +64,7 @@ MAESTRO_E2E_TOKEN="$TOKEN" maestro test mobile/.maestro/flows
 - `/(auth)/login` — magic link + Google OAuth via expo-web-browser
 - `/(auth)/signup` — magic link signup, 7-day Pro trial server-side
 - `/(tabs)/today` — pulse check + suggestion + magic buttons CTA
-- `/(tabs)/regulate` — 12 protocols list with category filters
+- `/(tabs)/regulate` — catalogue partagé avec le web (`src/lib/regulate/protocols.ts`), pas une seconde liste
 - `/(tabs)/score` — 7-day streak + Calm/Energy/Focus stats + sparkline
 - `/(tabs)/settings` — account info, billing/safety/notifications/data deep-link to web, logout
 - `/protocol/[slug]` — animated breathing circle player (Reanimated 4)
