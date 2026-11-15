@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, TextInput } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useRouter } from "expo-router"
 import * as Haptics from "expo-haptics"
-import { ArrowRight, Lock } from "lucide-react-native"
+import { ArrowRight } from "lucide-react-native"
 import { GlassCard } from "@/components/GlassCard"
 import { colors } from "@/lib/theme"
 import {
@@ -79,7 +79,7 @@ export default function RegulateScreen() {
         ) : (
           <View className="gap-3">
             {filtered.map((protocol) => {
-              const locked = protocol.base_plan !== "free"
+              const indicatedPlan = protocol.base_plan !== "free" ? protocol.base_plan : null
               return (
                 <Pressable
                   key={protocol.slug}
@@ -89,8 +89,8 @@ export default function RegulateScreen() {
                     router.push(`/protocol/${protocol.slug}`)
                   }}
                   accessibilityRole="button"
-                  accessibilityLabel={`${protocol.name_fr}, ${formatProtocolDuration(protocol.duration_seconds)}${
-                    locked ? `, indiqué pour le plan ${protocol.base_plan}` : ""
+                  accessibilityLabel={`${protocol.name_fr}, ${formatProtocolDuration(protocol.duration_seconds)}, ${categoryLabel(protocol.category)}${
+                    indicatedPlan ? `, indiqué pour le plan ${indicatedPlan}` : ""
                   }`}
                 >
                   <GlassCard className="p-5">
@@ -105,14 +105,10 @@ export default function RegulateScreen() {
                           {formatProtocolDuration(protocol.duration_seconds)} · {categoryLabel(protocol.category)}
                         </Text>
                       </View>
-                      {locked ? (
-                        <View className="flex-row items-center gap-1">
-                          <Lock size={12} color={colors.muted} />
-                          <Text className="text-muted text-[10px] uppercase">{protocol.base_plan}</Text>
-                        </View>
-                      ) : (
-                        <ArrowRight size={16} color={colors.muted} />
-                      )}
+                      {indicatedPlan ? (
+                        <Text className="text-muted text-[10px] uppercase">Plan {indicatedPlan}</Text>
+                      ) : null}
+                      <ArrowRight size={16} color={colors.muted} />
                     </View>
                   </GlassCard>
                 </Pressable>

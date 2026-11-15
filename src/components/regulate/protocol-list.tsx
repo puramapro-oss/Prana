@@ -8,21 +8,17 @@ import { cn } from "@/lib/utils"
 import {
   PROTOCOL_CATEGORIES,
   PROTOCOLS,
+  categoryLabel,
   type ProtocolDefinition,
   type ProtocolCategory,
 } from "@/lib/regulate/protocols"
+import { formatProtocolDuration } from "@/lib/regulate/playback"
 import type { Plan } from "@/lib/supabase/types"
 
 const PLAN_TIER: Record<Plan, number> = { free: 0, starter: 1, pro: 2, ultime: 3 }
 
 interface ProtocolListProps {
   plan: Plan
-}
-
-function durationLabel(seconds: number): string {
-  if (seconds < 60) return `${seconds} sec`
-  const m = Math.round(seconds / 60)
-  return `${m} min`
 }
 
 export function ProtocolList({ plan }: ProtocolListProps) {
@@ -101,7 +97,7 @@ function ProtocolCard({ protocol, userPlan }: { protocol: ProtocolDefinition; us
         "hover:border-primary/40 hover:bg-card/80 hover:-translate-y-0.5",
         locked && "opacity-80",
       )}
-      aria-label={`${protocol.name_fr} — ${durationLabel(protocol.duration_seconds)}`}
+      aria-label={`${protocol.name_fr} — ${formatProtocolDuration(protocol.duration_seconds)} — ${categoryLabel(protocol.category)}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div
@@ -115,11 +111,7 @@ function ProtocolCard({ protocol, userPlan }: { protocol: ProtocolDefinition; us
             <Lock className="size-3" strokeWidth={1.8} />
             {protocol.base_plan}
           </span>
-        ) : (
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
-            {durationLabel(protocol.duration_seconds)}
-          </span>
-        )}
+        ) : null}
       </div>
       <div className="space-y-1">
         <h3 className="font-heading text-lg leading-tight">{protocol.name_fr}</h3>
@@ -127,8 +119,8 @@ function ProtocolCard({ protocol, userPlan }: { protocol: ProtocolDefinition; us
           {protocol.description_fr}
         </p>
       </div>
-      <div className="text-[11px] text-muted-foreground/70 capitalize mt-auto">
-        {protocol.category}
+      <div className="text-[11px] text-muted-foreground/70 mt-auto">
+        {formatProtocolDuration(protocol.duration_seconds)} · {categoryLabel(protocol.category)}
       </div>
     </Link>
   )

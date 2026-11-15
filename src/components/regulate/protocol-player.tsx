@@ -10,7 +10,8 @@ import { BreathingCircle } from "./breathing-circle"
 import { PulseCheckSlider } from "@/components/pulse/pulse-check-slider"
 import { cn } from "@/lib/utils"
 import { track } from "@/lib/analytics"
-import type { ProtocolDefinition, ProtocolStep } from "@/lib/regulate/protocols"
+import { categoryLabel, type ProtocolDefinition, type ProtocolStep } from "@/lib/regulate/protocols"
+import { formatProtocolDuration } from "@/lib/regulate/playback"
 
 type Stage = "before" | "running" | "after" | "done"
 
@@ -122,7 +123,7 @@ export function ProtocolPlayer({ protocol }: ProtocolPlayerProps) {
               <div>
                 <h2 className="font-heading text-2xl">{protocol.name_fr}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {Math.round(protocol.duration_seconds / 60) || 1} min · {protocol.category}
+                  {formatProtocolDuration(protocol.duration_seconds)} · {categoryLabel(protocol.category)}
                 </p>
               </div>
             </div>
