@@ -16,7 +16,10 @@ update prana.regulation_protocols as protocol
  where protocol.slug = corrections.slug
    and protocol.duration_seconds = corrections.previous_seconds
    and corrections.timing = (
-     select jsonb_agg(step - 'label' order by ordinal)
+     select jsonb_agg(
+       case when jsonb_typeof(step) = 'object' then step - 'label' else step end
+       order by ordinal
+     )
        from jsonb_array_elements(
          case when jsonb_typeof(protocol.steps) = 'array' then protocol.steps else '[]'::jsonb end
        ) with ordinality as program(step, ordinal)
