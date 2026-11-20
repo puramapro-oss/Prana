@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
+    "test:regulate": "playwright test --config=playwright.regulate.config.ts",
     "test:e2e:prod": "PLAYWRIGHT_BASE_URL=https://prana.purama.dev playwright test e2e/01-marketing.spec.ts e2e/05-security-headers.spec.ts"
   },
   "dependencies": {

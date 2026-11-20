@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { describe, it } from "vitest"
+import { test } from "@playwright/test"
 import {
   expandProtocol,
   formatProtocolDuration,
@@ -21,14 +21,26 @@ function breath(slug: string): ProtocolBreathStep {
   return step
 }
 
-describe("catalogue mobile et web", () => {
-  it("refuse les anciens slugs inventés par l'écran mobile", () => {
+test.describe("catalogue mobile et web", () => {
+  test("refuse les anciens slugs inventés par l'écran mobile", () => {
     for (const slug of ["478-breath", "box-breath", "physio-sigh", "coherence", "panic-stop"]) {
       assert.equal(findProtocol(slug), null)
     }
   })
 
-  it("retrouve la respiration carrée sous son slug canonique", () => {
+  test("annonce la durée de chaque protocole joué jusqu’à la dernière seconde", () => {
+    for (const protocol of PROTOCOLS) {
+      const beats = expandProtocol(protocol)
+      let state = startPlayback(initialPlayback(beats), beats)
+      for (let elapsed = 0; elapsed < protocol.duration_seconds; elapsed += 1) {
+        assert.equal(state.status, "running", protocol.slug)
+        state = tickPlayback(state, beats)
+      }
+      assert.equal(state.status, "done", protocol.slug)
+    }
+  })
+
+  test("retrouve la respiration carrée sous son slug canonique", () => {
     const protocol = findProtocol("box-breathing")
     assert.ok(protocol)
     assert.equal(protocol.name_fr, "Respiration carrée")
@@ -45,13 +57,13 @@ describe("catalogue mobile et web", () => {
   })
 })
 
-describe("interruption et reprise", () => {
+test.describe("interruption et reprise", () => {
   const beats: PlaybackBeat[] = [
     { stepIndex: 0, repeat: 1, repeats: 1, phase: "inhale", label: "Inspire 4s", detail: null, durationSec: 4, scale: 1.6 },
     { stepIndex: 0, repeat: 1, repeats: 1, phase: "exhale", label: "Expire 6s", detail: null, durationSec: 6, scale: 1 },
   ]
 
-  it("la pause et une seconde interruption ne font pas avancer le temps", () => {
+  test("la pause et une seconde interruption ne font pas avancer le temps", () => {
     let state = startPlayback(initialPlayback(beats), beats)
     state = tickPlayback(state, beats)
     assert.equal(state.secondsLeft, 3)
@@ -69,7 +81,7 @@ describe("interruption et reprise", () => {
     assert.equal(resumed.notice, null)
   })
 
-  it("termine seulement après la dernière seconde du dernier temps", () => {
+  test("termine seulement après la dernière seconde du dernier temps", () => {
     let state = startPlayback(initialPlayback(beats), beats)
     state = { ...state, beatIndex: 1, secondsLeft: 1 }
     state = tickPlayback(state, beats)
@@ -77,7 +89,7 @@ describe("interruption et reprise", () => {
     assert.equal(startPlayback(state, beats), state)
   })
 
-  it("la pause puis la reprise gardent la seconde en cours", () => {
+  test("la pause puis la reprise gardent la seconde en cours", () => {
     let state = startPlayback(initialPlayback(beats), beats)
     state = tickPlayback(state, beats)
     state = resumePlayback(pausePlayback(state))
@@ -86,7 +98,7 @@ describe("interruption et reprise", () => {
     assert.equal(state.beatIndex, 0)
   })
 
-  it("affiche les durées sans arrondir une minute et demie à deux minutes", () => {
+  test("affiche les durées sans arrondir une minute et demie à deux minutes", () => {
     assert.equal(formatProtocolDuration(90), "1 min 30 s")
     assert.equal(formatProtocolDuration(120), "2 min")
     assert.equal(formatProtocolDuration(30), "30 s")
@@ -95,12 +107,12 @@ describe("interruption et reprise", () => {
     assert.equal(formatProtocolDuration(-4), "durée inconnue")
   })
 
-  it("nomme les catégories en français", () => {
+  test("nomme les catégories en français", () => {
     assert.equal(categoryLabel("anxiety"), "Anxiété")
     assert.equal(categoryLabel("all"), "Tout")
   })
 
-  it("ignore une phase de durée nulle et joue tout le catalogue", () => {
+  test("ignore une phase de durée nulle et joue tout le catalogue", () => {
     const protocol = findProtocol("box-breathing")
     assert.ok(protocol)
     const step = breath("box-breathing")
@@ -118,7 +130,7 @@ describe("interruption et reprise", () => {
     }
   })
 
-  it("un protocole sans étape jouable ne démarre pas", () => {
+  test("un protocole sans étape jouable ne démarre pas", () => {
     const protocol = findProtocol("stop-stress")
     assert.ok(protocol)
     const empty = expandProtocol({ ...protocol, steps: [] })
